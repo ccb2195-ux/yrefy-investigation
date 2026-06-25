@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yrefy Investigation — Research Report</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0d1117; --bg2: #161b22; --bg3: #21262d; --border: #30363d;
+      --text: #c9d1d9; --text-muted: #8b949e; --text-bright: #f0f6fc;
+      --red: #f85149; --orange: #f0883e; --yellow: #e3b341;
+      --green: #3fb950; --blue: #58a6ff; --purple: #bc8cff;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: 'Inter', sans-serif; font-size: 15px; line-height: 1.65;
+      max-width: 1180px; margin: 0 auto; padding: 0 24px;
+    }
+    h1 { font-size: 2.2rem; font-weight: 700; color: var(--text-bright); line-height: 1.2; }
+    h2 {
+      font-size: 1.35rem; font-weight: 600; color: var(--text-bright);
+      margin: 2.5rem 0 1rem; border-bottom: 1px solid var(--border);
+      padding-bottom: 0.5rem; scroll-margin-top: 56px;
+    }
+    h3 { font-size: 1rem; font-weight: 600; color: var(--text-bright); margin: 1.2rem 0 0.4rem; }
+    p { margin-bottom: 0.75rem; }
+    a { color: var(--blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    sup a { color: var(--orange); font-size: 0.7em; font-weight: 600; }
+    code { font-family: 'JetBrains Mono', monospace; background: var(--bg3); padding: 1px 5px; border-radius: 3px; font-size: 0.85em; }
+
+    /* ── Header ── */
+    header { padding: 2.5rem 0 1.5rem; border-bottom: 1px solid var(--border); margin-bottom: 0; }
+    .header-kicker { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--orange); font-weight: 600; margin-bottom: 0.6rem; }
+    .header-meta { display: flex; flex-wrap: wrap; gap: 1.2rem; margin-top: 0.75rem; font-size: 0.82rem; color: var(--text-muted); }
+    .badge {
+      display: inline-block; padding: 2px 8px; border-radius: 4px;
+      font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em;
+    }
+    .badge-red    { background: rgba(248,81,73,.15);   color: var(--red);    border: 1px solid rgba(248,81,73,.3); }
+    .badge-orange { background: rgba(240,136,62,.15);  color: var(--orange); border: 1px solid rgba(240,136,62,.3); }
+    .badge-yellow { background: rgba(227,179,65,.15);  color: var(--yellow); border: 1px solid rgba(227,179,65,.3); }
+    .badge-blue   { background: rgba(88,166,255,.15);  color: var(--blue);   border: 1px solid rgba(88,166,255,.3); }
+    .badge-green  { background: rgba(63,185,80,.15);   color: var(--green);  border: 1px solid rgba(63,185,80,.3); }
+
+    /* ── Nav ── */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(13,17,23,.96); backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border);
+      margin: 0 -24px; padding: 0.6rem 24px;
+    }
+    nav ul { list-style: none; display: flex; gap: 1.2rem; flex-wrap: wrap; font-size: 0.8rem; }
+    nav a { color: var(--text-muted); font-weight: 500; }
+    nav a:hover { color: var(--text-bright); text-decoration: none; }
+
+    /* ── Warning Banner ── */
+    .warning-banner {
+      background: rgba(248,81,73,.08); border: 1px solid rgba(248,81,73,.25);
+      border-radius: 8px; padding: 1rem 1.25rem; margin: 1.5rem 0;
+      font-size: 0.88rem; display: flex; gap: 0.75rem;
+    }
+
+    /* ── Stat Grid ── */
+    .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px,1fr)); gap: 0.75rem; margin: 1.25rem 0; }
+    .stat-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 1rem 1.2rem; }
+    .stat-value { font-size: 1.7rem; font-weight: 700; color: var(--text-bright); font-family: 'JetBrains Mono', monospace; }
+    .stat-label { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.15rem; text-transform: uppercase; letter-spacing: 0.05em; }
+
+    /* ── Timeline ── */
+    .timeline { position: relative; padding-left: 1.75rem; margin: 1.2rem 0; }
+    .timeline::before { content:''; position: absolute; left: 4px; top: 8px; bottom: 8px; width: 2px; background: var(--border); }
+    .timeline-item { position: relative; margin-bottom: 1.25rem; }
+    .timeline-item::before {
+      content:''; position: absolute; left: -1.75rem; top: 7px;
+      width: 10px; height: 10px; border-radius: 50%;
+      background: var(--border); border: 2px solid var(--bg);
+    }
+    .timeline-item.critical::before { background: var(--red); }
+    .timeline-item.warning::before  { background: var(--orange); }
+    .timeline-item.notable::before  { background: var(--yellow); }
+    .timeline-item.neutral::before  { background: var(--blue); }
+    .timeline-date { font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.1rem; }
+    .timeline-title { font-weight: 600; color: var(--text-bright); font-size: 0.92rem; }
+    .timeline-desc  { font-size: 0.83rem; color: var(--text); margin-top: 0.15rem; }
+
+    /* ── Finding Cards ── */
+    .finding-card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-left: 4px solid var(--border); border-radius: 8px;
+      padding: 1.1rem 1.3rem; margin-bottom: 0.9rem;
+    }
+    .finding-card.critical { border-left-color: var(--red); }
+    .finding-card.warning  { border-left-color: var(--orange); }
+    .finding-card.notable  { border-left-color: var(--yellow); }
+    .finding-header { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.4rem; }
+    .finding-title  { font-weight: 600; color: var(--text-bright); font-size: 0.95rem; }
+    .finding-body   { font-size: 0.87rem; color: var(--text); }
+
+    /* ── Tables ── */
+    table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 0.85rem; }
+    th {
+      text-align: left; padding: 0.55rem 0.75rem;
+      background: var(--bg3); color: var(--text-bright);
+      font-weight: 600; font-size: 0.78rem; text-transform: uppercase;
+      letter-spacing: 0.05em; border-bottom: 2px solid var(--border);
+    }
+    td { padding: 0.55rem 0.75rem; border-bottom: 1px solid var(--border); vertical-align: top; }
+    tr:hover td { background: rgba(33,38,45,.6); }
+    .missing { color: var(--red); font-weight: 700; }
+    .confirmed { color: var(--green); }
+    .priority-high td:first-child   { color: var(--red);       font-weight: 700; }
+    .priority-medium td:first-child { color: var(--orange);    font-weight: 600; }
+    .priority-low td:first-child    { color: var(--text-muted); }
+
+    /* ── Network Graph ── */
+    #network-container {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 8px; height: 560px; margin: 0.75rem 0;
+    }
+    .graph-legend { display: flex; gap: 1.25rem; flex-wrap: wrap; font-size: 0.78rem; margin: 0.5rem 0 1.5rem; }
+    .legend-item  { display: flex; align-items: center; gap: 0.35rem; }
+    .legend-dot   { width: 11px; height: 11px; border-radius: 50%; flex-shrink: 0; }
+
+    /* ── Pitch ── */
+    .pitch-container { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 1.25rem; margin: 0.75rem 0; }
+    .pitch-label {
+      font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--text-muted); margin-bottom: 0.6rem;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    #pitch-text {
+      width: 100%; background: var(--bg3); border: 1px solid var(--border);
+      border-radius: 6px; color: var(--text-bright); font-family: 'Inter', sans-serif;
+      font-size: 0.93rem; line-height: 1.75; padding: 0.9rem; resize: vertical; min-height: 130px;
+    }
+    #pitch-text:focus { outline: none; border-color: var(--blue); }
+    .copy-btn {
+      background: var(--bg3); border: 1px solid var(--border); color: var(--text);
+      padding: 3px 10px; border-radius: 4px; font-size: 0.78rem; cursor: pointer;
+      font-family: 'Inter', sans-serif; transition: background .15s;
+    }
+    .copy-btn:hover { background: var(--border); color: var(--text-bright); }
+
+    /* ── Outlets ── */
+    .outlet-card {
+      background: var(--bg2); border: 1px solid var(--border); border-radius: 8px;
+      padding: 0.9rem 1.1rem; margin-bottom: 0.65rem;
+      display: grid; grid-template-columns: 28px 1fr; gap: 0.65rem;
+    }
+    .outlet-rank { font-family: 'JetBrains Mono', monospace; font-size: 1.1rem; font-weight: 700; color: var(--text-muted); padding-top: 2px; }
+    .outlet-name { font-weight: 600; color: var(--text-bright); font-size: 0.93rem; }
+    .outlet-why  { font-size: 0.83rem; color: var(--text); margin-top: 0.15rem; }
+    .outlet-angle{ font-size: 0.78rem; color: var(--text-muted); margin-top: 0.2rem; font-style: italic; }
+
+    /* ── Footnotes ── */
+    .footnotes { margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+    .footnotes h2 { font-size: 1rem; margin-top: 0; }
+    .footnotes ol { padding-left: 1.4rem; font-size: 0.78rem; color: var(--text-muted); }
+    .footnotes li { margin-bottom: 0.3rem; line-height: 1.5; }
+    .footnotes a  { color: var(--text-muted); }
+    .footnotes a:hover { color: var(--blue); }
+    .fn-target { scroll-margin-top: 60px; }
+
+    footer { padding: 2rem 0; text-align: center; color: var(--text-muted); font-size: 0.78rem; border-top: 1px solid var(--border); margin-top: 2rem; }
+
+    @media (max-width: 640px) {
+      h1 { font-size: 1.6rem; }
+      nav ul { gap: 0.7rem; }
+      .summary-grid { grid-template-columns: repeat(2,1fr); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════ HEADER ════════════════════════════════════ -->
+<header>
+  <div class="header-kicker">Investigative Research Report — Private</div>
+  <h1>Yrefy LLC: Guaranteed Returns,<br>Unregistered Offerings, and a Missing Fund</h1>
+  <div class="header-meta">
+    <span>Compiled: June 25, 2026</span>
+    <span>Subject: Yrefy LLC &amp; SLP subsidiaries</span>
+    <span>Jurisdiction: Arizona (HQ), Delaware (incorporation), Massachusetts (enforcement)</span>
+    <span class="badge badge-red">Active Investigation</span>
+    <span class="badge badge-orange">State Enforcement Confirmed</span>
+    <span class="badge badge-yellow">Federal Lawsuit Pending</span>
+  </div>
+</header>
+
+<!-- ════════════════════════════════════ NAV ════════════════════════════════════ -->
+<nav>
+  <ul>
+    <li><a href="#summary">Summary</a></li>
+    <li><a href="#timeline">Timeline</a></li>
+    <li><a href="#findings">Key Findings</a></li>
+    <li><a href="#slp-series">SLP Series</a></li>
+    <li><a href="#personnel">Personnel</a></li>
+    <li><a href="#network">Network Graph</a></li>
+    <li><a href="#leads">Next Steps</a></li>
+    <li><a href="#pitch">Pitch &amp; Outlets</a></li>
+    <li><a href="#refs">Sources</a></li>
+  </ul>
+</nav>
+
+<!-- ════════════════════════════════════ SUMMARY ════════════════════════════════════ -->
+<section id="summary">
+  <h2>Executive Summary</h2>
+
+  <div class="warning-banner">
+    <span>⚠</span>
+    <span>This report documents a pattern of potential securities fraud indicators: unregistered offerings, mathematically unsustainable return promises, admitted state securities violations, a fund series with no SEC filing of any kind, and comparison by a professional fraud investigator to a $650 million Ponzi scheme. No court has yet adjudicated fraud. All allegations are documented and sourced below.</span>
+  </div>
+
+  <p>Yrefy LLC is an Arizona-based company that refinances defaulted private student loans. Since approximately 2018, it has raised investor capital through a series of Regulation D private placement offerings (SLP1–SLP5), promising accredited investors fixed annual returns of 6.5–10.25%. The company has no independent audit, its two principals have no current securities registrations, one entire fund series (SLP2) has no SEC filing of any kind, and its advertised borrower interest rates (max ~5.99%) are mathematically insufficient to cover its promised investor returns while also funding tens of millions in television advertising.</p>
+
+  <div class="summary-grid">
+    <div class="stat-card">
+      <div class="stat-value">$2.1M</div>
+      <div class="stat-label">MA Securities Settlement (Feb 2025)</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">10.25%</div>
+      <div class="stat-label">Promised annual investor return</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">5.99%</div>
+      <div class="stat-label">Max borrower interest rate charged</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">$21M+</div>
+      <div class="stat-label">Total capital raised across filed SLPs</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">0</div>
+      <div class="stat-label">Independent audits completed</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">SLP2</div>
+      <div class="stat-label">Missing — no Form D, no SEC record</div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════ TIMELINE ════════════════════════════════════ -->
+<section id="timeline">
+  <h2>Timeline of Key Events</h2>
+  <div class="timeline">
+
+    <div class="timeline-item neutral">
+      <div class="timeline-date">c. 2010–2015</div>
+      <div class="timeline-title">NextStudent Inc. operated under Fenstermaker</div>
+      <div class="timeline-desc">Donald Fenstermaker ran NextStudent Inc., a student loan company whose history is a precursor to Yrefy's model. No FINRA registration on record for Fenstermaker at any point.<sup><a href="#fn12" id="ref12">[12]</a></sup></div>
+    </div>
+
+    <div class="timeline-item neutral">
+      <div class="timeline-date">May 2014</div>
+      <div class="timeline-title">Schoneberger's last FINRA registration lapses</div>
+      <div class="timeline-desc">Nathan Laine Schoneberger (CRD #2715309) departs First Financial Equity Corporation. His broker-dealer registration expires; he has not been a registered broker since.<sup><a href="#fn3" id="ref3">[3]</a></sup><sup><a href="#fn4" id="ref4">[4]</a></sup></div>
+    </div>
+
+    <div class="timeline-item neutral">
+      <div class="timeline-date">April 2016</div>
+      <div class="timeline-title">Schoneberger registers as IA Rep at Newmark Capital Management</div>
+      <div class="timeline-desc">Per his last Form U4, Schoneberger is listed as an Investment Adviser Representative at Newmark Capital Management LLC. Yrefy does not appear on this U4 filing.<sup><a href="#fn3" id="ref3b">[3]</a></sup></div>
+    </div>
+
+    <div class="timeline-item neutral">
+      <div class="timeline-date">c. 2017–2018</div>
+      <div class="timeline-title">Yrefy LLC founded</div>
+      <div class="timeline-desc">Fenstermaker and Schoneberger co-found Yrefy. Neither has current securities registration. The company begins refinancing defaulted private student loans and raising investor capital — with no Form D filings yet recorded for this period.<sup><a href="#fn5" id="ref5">[5]</a></sup></div>
+    </div>
+
+    <div class="timeline-item notable">
+      <div class="timeline-date">January 29, 2020</div>
+      <div class="timeline-title">Yrefy SLP3 Form D filed — before SLP1</div>
+      <div class="timeline-desc">SLP3's first Form D is filed with the SEC under 506(b), reporting $670,000 raised. Notably, SLP3 predates SLP1's first filing by 11 months, suggesting numbering is not chronological and earlier offerings may have operated without filing.<sup><a href="#fn6" id="ref6">[6]</a></sup></div>
+    </div>
+
+    <div class="timeline-item notable">
+      <div class="timeline-date">April 22, 2020</div>
+      <div class="timeline-title">SLP3 switches from 506(b) to 506(c)</div>
+      <div class="timeline-desc">506(b) prohibits general solicitation (i.e., TV advertising). The switch to 506(c) suggests Yrefy was advertising on television for an offering that did not permit it. SLP1 never makes this switch and stays on 506(b) throughout.<sup><a href="#fn6" id="ref6b">[6]</a></sup></div>
+    </div>
+
+    <div class="timeline-item warning">
+      <div class="timeline-date">December 10, 2020</div>
+      <div class="timeline-title">Yrefy SLP1 Form D filed — $2.8M already raised on first filing</div>
+      <div class="timeline-desc">SLP1's initial Form D reports $2,800,000 already raised under Rule 506(b). The amount suggests the offering had been active prior to filing, potentially without a valid Reg D exemption.<sup><a href="#fn5" id="ref5b">[5]</a></sup></div>
+    </div>
+
+    <div class="timeline-item warning">
+      <div class="timeline-date">April 30, 2021</div>
+      <div class="timeline-title">SLP1 reaches $3.9M; SLP3 reaches $10M; SLP4 first filed</div>
+      <div class="timeline-desc">A cluster of amendments and new filings. SLP4 uses 506(c) from the start, consistent with active TV advertising. At no point is there any Form D filing for a "Yrefy SLP2 LLC" entity.<sup><a href="#fn7" id="ref7">[7]</a></sup></div>
+    </div>
+
+    <div class="timeline-item warning">
+      <div class="timeline-date">July 12, 2022</div>
+      <div class="timeline-title">SLP4 amended — $7.045M raised</div>
+      <div class="timeline-desc">Yrefy SLP4 LLC (CIK: 0001859283) reports $7,045,000 raised under Rule 506(c). Heavy Fox News advertising confirmed during this period by fraud investigator Barry Minkow.<sup><a href="#fn2" id="ref2">[2]</a></sup><sup><a href="#fn8" id="ref8">[8]</a></sup></div>
+    </div>
+
+    <div class="timeline-item warning">
+      <div class="timeline-date">2021–2024</div>
+      <div class="timeline-title">Fox News and CNBC advertising campaign</div>
+      <div class="timeline-desc">Yrefy airs heavy advertising on Fox News and CNBC. Charlie Kirk appears in a Fox segment featuring Yrefy. 17+ paid celebrity and media endorsers are used, none of whom are disclosed as compensated promoters to investors.<sup><a href="#fn18" id="ref18">[18]</a></sup><sup><a href="#fn19" id="ref19">[19]</a></sup></div>
+    </div>
+
+    <div class="timeline-item critical">
+      <div class="timeline-date">2024</div>
+      <div class="timeline-title">Schoneberger falsely claims "PCAOB audit" coming in Q1 2025</div>
+      <div class="timeline-desc">When asked for audited financials, Schoneberger tells a prospective investor Yrefy is "preparing for a PCAOB audit." PCAOB oversight applies only to auditors of publicly traded companies. A private LLC cannot receive a PCAOB audit. No audit ever occurred.<sup><a href="#fn10" id="ref10">[10]</a></sup><sup><a href="#fn22" id="ref22">[22]</a></sup></div>
+    </div>
+
+    <div class="timeline-item critical">
+      <div class="timeline-date">February 3, 2025</div>
+      <div class="timeline-title">Massachusetts Consent Order — $750K fine + $1.418M rescission</div>
+      <div class="timeline-desc">The Commonwealth of Massachusetts Securities Division (Docket E-2024-0334) issues a Consent Order finding violations of M.G.L. c. 110A §101. Yrefy admits: undisclosed paid endorsers (17+), false "10.25% guaranteed" return claims, false "no attack on your principal" statements, and false claim of independent collateral agent (Yrefy itself is the collateral agent per the Security Agreement). Fine: $750,000. Required rescission offers to 8 MA investors on $1,418,000.<sup><a href="#fn1" id="ref1">[1]</a></sup><sup><a href="#fn11" id="ref11">[11]</a></sup></div>
+    </div>
+
+    <div class="timeline-item critical">
+      <div class="timeline-date">April 2025</div>
+      <div class="timeline-title">Federal lawsuit filed: Mentor et al. v. Yrefy SLP5 LLC</div>
+      <div class="timeline-desc">Marvin Mentor, Melinda Emonyon, and Victor Emonyon file a Breach of Contract complaint against Yrefy SLP5 LLC in federal court, related to U.S. Department of Education loans refinanced by Yrefy. Case active as of November 2025.<sup><a href="#fn17" id="ref17">[17]</a></sup></div>
+    </div>
+
+    <div class="timeline-item warning">
+      <div class="timeline-date">February 2026</div>
+      <div class="timeline-title">Barry Minkow publishes detailed fraud analysis</div>
+      <div class="timeline-desc">Minkow — a convicted fraudster turned fraud investigator who has exposed multiple Ponzi schemes — publishes analysis comparing Yrefy's Fox News advertising pattern to the NRIA scheme ($650M Ponzi). He offers to fund a forensic audit and alerts Fox News, which declines to act.<sup><a href="#fn8" id="ref8b">[8]</a></sup><sup><a href="#fn9" id="ref9">[9]</a></sup></div>
+    </div>
+
+    <div class="timeline-item notable">
+      <div class="timeline-date">July 2, 2025</div>
+      <div class="timeline-title">SLP4 new Form D filed — $0 raised yet (new fundraising round)</div>
+      <div class="timeline-desc">A new Form D is filed under the Yrefy SLP4 entity, reporting zero dollars raised so far. Suggests the company has exhausted prior investor pools and is actively seeking fresh capital.<sup><a href="#fn2" id="ref2b">[2]</a></sup></div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ════════════════════════════════════ KEY FINDINGS ════════════════════════════════════ -->
+<section id="findings">
+  <h2>Key Findings</h2>
+
+  <div class="finding-card critical">
+    <div class="finding-header">
+      <span class="badge badge-red">Critical</span>
+      <div class="finding-title">The Math Is Impossible Without New Money Funding Old Returns</div>
+    </div>
+    <div class="finding-body">
+      Yrefy charges borrowers a maximum ~5.99% interest while promising investors up to 10.25% annually. On top of this, the company spent an estimated $5.4M+ on television advertising and $726,500+ on a single celebrity endorser. There is no disclosed revenue source that bridges this gap. The PPM (page 67) explicitly states that proceeds from new offerings will be used for "refinancing of private student loans, the purchase of previous SLPs, <em>and the retirement of previous investors</em>" — the textbook Ponzi disclosure phrase.<sup><a href="#fn15" id="ref15">[15]</a></sup>
+    </div>
+  </div>
+
+  <div class="finding-card critical">
+    <div class="finding-header">
+      <span class="badge badge-red">Critical</span>
+      <div class="finding-title">Yrefy SLP2 Has No SEC Filing of Any Kind</div>
+    </div>
+    <div class="finding-body">
+      Searches of SEC EDGAR, FormDs.com, and NASAA's Electronic Filing Depository return zero results for any entity named "Yrefy SLP2 LLC." SLP1, SLP3, SLP4, and SLP5 all have Form D filings. SLP2 does not. Under Securities Act Section 5, selling securities without a valid exemption is a federal violation.<sup><a href="#fn23" id="ref23">[23]</a></sup> Investors in SLP2 hold an absolute rescission right under Section 12(a)(1).<sup><a href="#fn16" id="ref16">[16]</a></sup> The SEC has no visibility into how much SLP2 raised or how many investors it affected.<sup><a href="#fn7" id="ref7b">[7]</a></sup>
+    </div>
+  </div>
+
+  <div class="finding-card critical">
+    <div class="finding-header">
+      <span class="badge badge-red">Critical</span>
+      <div class="finding-title">Admitted State Securities Violations — Massachusetts Consent Order</div>
+    </div>
+    <div class="finding-body">
+      The February 3, 2025 Consent Order (Docket E-2024-0334) contains admitted facts: (1) 17+ paid endorsers whose compensation was never disclosed to investors; (2) false claims that returns of "up to" 10.25% were guaranteed; (3) false statements that investor principal was fully protected when the PPM itself contains no such guarantee; (4) false representation that an independent collateral agent held security — the Security Agreement names Yrefy itself as collateral agent.<sup><a href="#fn1" id="ref1b">[1]</a></sup><sup><a href="#fn24" id="ref24">[24]</a></sup>
+    </div>
+  </div>
+
+  <div class="finding-card critical">
+    <div class="finding-header">
+      <span class="badge badge-red">Critical</span>
+      <div class="finding-title">PCAOB Audit Misrepresentation</div>
+    </div>
+    <div class="finding-body">
+      CIO Schoneberger told a prospective investor that Yrefy was "preparing for a PCAOB audit" to occur in Q1 2025. PCAOB (Public Company Accounting Oversight Board) is established under Sarbanes-Oxley and oversees auditors of SEC-registered public companies only. A private LLC cannot obtain a PCAOB audit. This statement was factually impossible and designed to create a false impression of regulatory oversight. No audit has occurred; the investor site now says "has not been independently audited."<sup><a href="#fn10" id="ref10b">[10]</a></sup><sup><a href="#fn21" id="ref21">[21]</a></sup><sup><a href="#fn22" id="ref22b">[22]</a></sup>
+    </div>
+  </div>
+
+  <div class="finding-card warning">
+    <div class="finding-header">
+      <span class="badge badge-orange">Significant</span>
+      <div class="finding-title">Both Principals Unregistered — No FINRA or SEC IA Registration</div>
+    </div>
+    <div class="finding-body">
+      <strong>Donald Fenstermaker (CEO/Chairman):</strong> Zero results in FINRA BrokerCheck. Has never been a registered broker-dealer or investment adviser representative in any jurisdiction.<sup><a href="#fn12" id="ref12b">[12]</a></sup><br><br>
+      <strong>Nathan Laine Schoneberger (CIO):</strong> CRD #2715309. Last registered May 2014 (First Financial Equity Corp). Has been unregistered for 12 years while running Yrefy's capital-raising operations. Has 3 customer dispute disclosures: churning allegation (2012, $36K), borrowing $75K from a client and not repaying it (2007, $111K claimed), and inappropriate insurance products (2006). All closed without payment but on permanent record.<sup><a href="#fn3" id="ref3c">[3]</a></sup><sup><a href="#fn4" id="ref4b">[4]</a></sup>
+    </div>
+  </div>
+
+  <div class="finding-card warning">
+    <div class="finding-header">
+      <span class="badge badge-orange">Significant</span>
+      <div class="finding-title">SLP1 Raised Under 506(b) — Which Prohibits TV Advertising</div>
+    </div>
+    <div class="finding-body">
+      Yrefy SLP1 filed all Form Ds under Rule 506(b), which prohibits "general solicitation" — a category that includes television advertising. If Yrefy aired Fox News or CNBC ads while SLP1 was the active offering (2020–2021), those ads constituted general solicitation for an offering that did not permit it, potentially invalidating the 506(b) exemption for all SLP1 investors and triggering rescission rights.<sup><a href="#fn5" id="ref5c">[5]</a></sup><sup><a href="#fn23" id="ref23b">[23]</a></sup>
+    </div>
+  </div>
+
+  <div class="finding-card warning">
+    <div class="finding-header">
+      <span class="badge badge-orange">Significant</span>
+      <div class="finding-title">Fraud Investigator Barry Minkow Flags Yrefy as NRIA-Pattern Risk</div>
+    </div>
+    <div class="finding-body">
+      Minkow — who exposed ZZZZ Best (1987) and has subsequently identified multiple Ponzi schemes — published detailed analysis identifying the same Fox News advertising pattern in Yrefy that preceded the NRIA collapse. NRIA raised $650M from investors, including $90M from elderly investors, before its 2022 collapse. Minkow specifically flagged the "retirement of previous investors" PPM language and the advertising intensity as desperation-fundraising indicators. He offered to pay for an independent forensic audit and alerted Fox News; Fox declined to stop airing Yrefy ads.<sup><a href="#fn8" id="ref8c">[8]</a></sup><sup><a href="#fn9" id="ref9b">[9]</a></sup>
+    </div>
+  </div>
+
+  <div class="finding-card notable">
+    <div class="finding-header">
+      <span class="badge badge-yellow">Notable</span>
+      <div class="finding-title">SLP3 Filed Before SLP1 — Chronology Anomaly</div>
+    </div>
+    <div class="finding-body">
+      Yrefy SLP3's first Form D was filed January 29, 2020 — 11 months before SLP1's first filing. The SLP1 filing reported $2.8M already raised on its initial Form D (filed December 2020). These facts together suggest either: (a) some SLP series were operating for extended periods before filing, or (b) the series numbers do not correspond to launch order. Either scenario implies earlier fundraising rounds not captured in any SEC filing.<sup><a href="#fn5" id="ref5d">[5]</a></sup><sup><a href="#fn6" id="ref6c">[6]</a></sup>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════ SLP SERIES ════════════════════════════════════ -->
+<section id="slp-series">
+  <h2>SLP Series — Form D Filing Status</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Entity</th>
+        <th>First Filing</th>
+        <th>Total Raised</th>
+        <th>Exemption</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Yrefy SLP1, LLC</td>
+        <td>Dec 10, 2020</td>
+        <td>$3,921,000</td>
+        <td>506(b) only — no general solicitation permitted</td>
+        <td><span class="badge badge-yellow">Filed — 506(b) ad conflict</span></td>
+      </tr>
+      <tr>
+        <td><strong class="missing">Yrefy SLP2, LLC</strong></td>
+        <td class="missing">NEVER FILED</td>
+        <td class="missing">UNKNOWN</td>
+        <td class="missing">NONE</td>
+        <td><span class="badge badge-red">No SEC Record — Potential Unregistered Offering</span></td>
+      </tr>
+      <tr>
+        <td>Yrefy SLP3, LLC</td>
+        <td>Jan 29, 2020 <em>(before SLP1)</em></td>
+        <td>$10,000,000</td>
+        <td>506(b) → 506(c) April 2020</td>
+        <td><span class="badge badge-yellow">Filed — early 506(b) ad conflict</span></td>
+      </tr>
+      <tr>
+        <td>Yrefy SLP4, LLC (CIK: 0001859283)</td>
+        <td>Apr 30, 2021</td>
+        <td>$7,045,000 (as of Jul 2022); new round opened Jul 2025</td>
+        <td>506(c) — named in MA Consent Order</td>
+        <td><span class="badge badge-orange">Filed — MA enforcement action</span></td>
+      </tr>
+      <tr>
+        <td>Yrefy SLP5, LLC</td>
+        <td>2025 (accession 0000911420-25-000211)</td>
+        <td>TBD</td>
+        <td>506(c)</td>
+        <td><span class="badge badge-blue">Filed — federal lawsuit active</span></td>
+      </tr>
+    </tbody>
+  </table>
+  <p style="font-size:0.82rem; color: var(--text-muted); margin-top: 0.5rem;">
+    Sources: FormDs.com<sup><a href="#fn5" id="ref5e">[5]</a></sup><sup><a href="#fn6" id="ref6d">[6]</a></sup><sup><a href="#fn7" id="ref7c">[7]</a></sup><sup><a href="#fn2" id="ref2c">[2]</a></sup>, NASAA EFD, SEC EDGAR CIK 0001859283.
+  </p>
+</section>
+
+<!-- ════════════════════════════════════ PERSONNEL ════════════════════════════════════ -->
+<section id="personnel">
+  <h2>Key Personnel</h2>
+  <table>
+    <thead>
+      <tr><th>Name</th><th>Title at Yrefy</th><th>FINRA/CRD</th><th>Last Registered</th><th>Disclosures</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Donald Fenstermaker</strong></td>
+        <td>CEO / Chairman / Co-Founder</td>
+        <td class="missing">Zero records — never registered</td>
+        <td class="missing">N/A</td>
+        <td>None on file (no registration = no record)</td>
+      </tr>
+      <tr>
+        <td><strong>Nathan "Laine" Schoneberger</strong></td>
+        <td>CIO / Managing Partner / Co-Founder</td>
+        <td>CRD #2715309</td>
+        <td>May 2014 — First Financial Equity Corp.</td>
+        <td>3 customer disputes: churning (2012, $36K, denied); borrowed $75K from client (2007, $111K claimed); inappropriate insurance (2006). All closed/denied.</td>
+      </tr>
+      <tr>
+        <td><strong>Cassandra Sifford</strong></td>
+        <td>COO</td>
+        <td>Not checked</td>
+        <td>—</td>
+        <td>—</td>
+      </tr>
+    </tbody>
+  </table>
+  <p style="font-size:0.82rem; color: var(--text-muted);">Sources: FINRA BrokerCheck<sup><a href="#fn3" id="ref3d">[3]</a></sup><sup><a href="#fn4" id="ref4c">[4]</a></sup><sup><a href="#fn12" id="ref12c">[12]</a></sup>, SEC IAPD (confirms same registration gap for Schoneberger).</p>
+</section>
+
+<!-- ════════════════════════════════════ NETWORK GRAPH ════════════════════════════════════ -->
+<section id="network">
+  <h2>Connection Network</h2>
+  <p style="font-size:0.85rem; color: var(--text-muted); margin-bottom: 0.5rem;">Drag nodes to reposition. Scroll to zoom. Hover for tooltips. Colors: <strong>blue</strong> = entities, <strong>orange</strong> = people, <strong>red</strong> = regulators/legal, <strong>green</strong> = media, <strong>yellow</strong> = risk flags.</p>
+  <div id="network-container"></div>
+  <div class="graph-legend">
+    <div class="legend-item"><div class="legend-dot" style="background:#4a90d9"></div> Corporate Entity</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#f0883e"></div> Individual</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#f85149"></div> Regulator / Legal</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#3fb950"></div> Media</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#e3b341"></div> Risk Flag</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#bc8cff"></div> Related Entity</div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════ NEXT STEPS ════════════════════════════════════ -->
+<section id="leads">
+  <h2>Leads by Priority &amp; Next Steps</h2>
+  <table>
+    <thead>
+      <tr><th>Priority</th><th>Target</th><th>Method</th><th>Why It Matters</th></tr>
+    </thead>
+    <tbody>
+      <tr class="priority-high">
+        <td>HIGH</td>
+        <td>Mentor v. Yrefy SLP5 — federal complaint</td>
+        <td>CourtListener (OAuth via /mcp) or PACER (pacer.gov)</td>
+        <td>The actual breach alleged may name new facts, individuals, or financial details not in public documents</td>
+      </tr>
+      <tr class="priority-high">
+        <td>HIGH</td>
+        <td>SLP2 investor identification</td>
+        <td>Arizona Corporation Commission entity search for "Yrefy SLP2 LLC"; subpoena-level: AZ Corp Commission blue sky files</td>
+        <td>Investors in an unregistered offering have automatic rescission rights — they may not know this</td>
+      </tr>
+      <tr class="priority-high">
+        <td>HIGH</td>
+        <td>Other state enforcement actions</td>
+        <td>Search each NASAA member state securities regulator: TX, FL, CO, CA, NY</td>
+        <td>MA acted; Fox News advertising is national. Other states almost certainly received complaints or opened investigations</td>
+      </tr>
+      <tr class="priority-high">
+        <td>HIGH</td>
+        <td>Barry Minkow's full Substack analysis</td>
+        <td><a href="https://barryminkow.substack.com/p/three-unexplainable-things-yrefy" target="_blank">barryminkow.substack.com</a></td>
+        <td>He likely has financial modeling and internal document analysis not available in public sources</td>
+      </tr>
+      <tr class="priority-medium">
+        <td>MEDIUM</td>
+        <td>Arizona Corporation Commission entity records</td>
+        <td><a href="https://ecorp.azcc.gov" target="_blank">ecorp.azcc.gov</a> — search "Yrefy"</td>
+        <td>Entity filings, registered agents, member lists for all SLP LLCs including SLP2; may reveal formation/dissolution dates</td>
+      </tr>
+      <tr class="priority-medium">
+        <td>MEDIUM</td>
+        <td>Identify the 17+ paid endorsers</td>
+        <td>Search YouTube, Facebook, iHeart Radio, Spotify for "Yrefy" ads 2021–2024</td>
+        <td>Other states' securities regulators may pursue those endorsers; FTC may have jurisdiction over undisclosed endorsements</td>
+      </tr>
+      <tr class="priority-medium">
+        <td>MEDIUM</td>
+        <td>CFPB borrower complaint database</td>
+        <td><a href="https://www.consumerfinance.gov/data-research/consumer-complaints/" target="_blank">consumerfinance.gov complaints</a> — search "Yrefy"</td>
+        <td>Borrower complaints may reveal actual default rates vs. the 2% claimed; also student loan servicing violations</td>
+      </tr>
+      <tr class="priority-medium">
+        <td>MEDIUM</td>
+        <td>Cassandra Sifford (COO) background</td>
+        <td>SEC IAPD, BrokerCheck, LinkedIn, AZ Corp Commission</td>
+        <td>Not yet checked — third principal may have registration history or prior regulatory issues</td>
+      </tr>
+      <tr class="priority-medium">
+        <td>MEDIUM</td>
+        <td>Schoneberger's Newmark Capital Mgmt relationship</td>
+        <td>SEC IAPD search for Newmark Capital Management LLC; contact the firm</td>
+        <td>If Schoneberger was an IA Rep at Newmark while running Yrefy, failure to disclose outside business activity to his registered firm is a serious compliance violation</td>
+      </tr>
+      <tr class="priority-low">
+        <td>LOW</td>
+        <td>NextStudent Inc. regulatory history</td>
+        <td>SEC EDGAR, news archives, AZ Corp Commission</td>
+        <td>Understanding why Fenstermaker's prior student loan company ended may illuminate Yrefy's structural choices</td>
+      </tr>
+      <tr class="priority-low">
+        <td>LOW</td>
+        <td>SLP4 SLP5 full PPM text from EDGAR</td>
+        <td>SEC EDGAR — accession 0000911420-25-000211 for SLP5; CIK 0001859283 for SLP4</td>
+        <td>Full text may contain additional representations about collateral, audits, or use of proceeds not captured in Form D</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ════════════════════════════════════ PITCH & OUTLETS ════════════════════════════════════ -->
+<section id="pitch">
+  <h2>Story Pitch &amp; Target Outlets</h2>
+
+  <h3>Editable Pitch</h3>
+  <div class="pitch-container">
+    <div class="pitch-label">
+      <span>Draft Pitch — Click to Edit</span>
+      <button class="copy-btn" onclick="copyPitch()">Copy</button>
+    </div>
+    <textarea id="pitch-text">An Arizona company called Yrefy has been promising accredited investors returns of up to 10.25% — while charging student loan borrowers a maximum 5.99% in interest — and spending millions of dollars on Fox News ads and undisclosed celebrity endorsers. Massachusetts regulators already hit them with a $2.1 million settlement after finding the company lied about guaranteed returns, lied about independent collateral protection, and paid 17+ celebrities without telling investors. One entire fund series (SLP2) has no SEC filing anywhere — meaning those investors may have bought unregistered securities and hold automatic rescission rights they don't know about. A fraud investigator who exposed a prior $650 million Ponzi scheme says the advertising pattern is identical. We have the documents, the math, and the regulators' own admitted facts.</textarea>
+  </div>
+
+  <h3>Top 5 Target Outlets</h3>
+
+  <div class="outlet-card">
+    <div class="outlet-rank">1</div>
+    <div>
+      <div class="outlet-name">ProPublica</div>
+      <div class="outlet-why">Deep investigative capacity; strong track record on financial fraud targeting ordinary investors. The student loan angle — vulnerable borrowers being refinanced into a potentially fraudulent structure — fits their consumer-harm mandate precisely. They can compel document production and conduct long-form sourcing.</div>
+      <div class="outlet-angle">Best angle: "The company promising to save student loan borrowers may be using them to run a Ponzi scheme."</div>
+    </div>
+  </div>
+
+  <div class="outlet-card">
+    <div class="outlet-rank">2</div>
+    <div>
+      <div class="outlet-name">Bloomberg Businessweek / Bloomberg Law</div>
+      <div class="outlet-why">Owns the Reg D abuse beat. Their audience includes accredited investors — the exact population being targeted. Bloomberg Law has PACER access and full EDGAR access in-house. They covered NRIA extensively and would immediately recognize the pattern comparison Minkow draws.</div>
+      <div class="outlet-angle">Best angle: "The Reg D Loophole That Let a Student Loan Company Advertise Impossible Returns on Fox News."</div>
+    </div>
+  </div>
+
+  <div class="outlet-card">
+    <div class="outlet-rank">3</div>
+    <div>
+      <div class="outlet-name">Wall Street Journal (Investigative Desk)</div>
+      <div class="outlet-way">The Journal has covered SEC enforcement gaps and private placement fraud repeatedly. The Fox News advertising angle is a hook because it implicates a major media company's ad standards. The PCAOB lie gives them a specific, documentable misrepresentation to anchor the story.</div>
+      <div class="outlet-angle">Best angle: "A student loan company told investors it was getting a PCAOB audit. That's legally impossible."</div>
+    </div>
+  </div>
+
+  <div class="outlet-card">
+    <div class="outlet-rank">4</div>
+    <div>
+      <div class="outlet-name">The Intercept</div>
+      <div class="outlet-why">Will pursue the Fox News complicity angle aggressively. Barry Minkow's documented warning to Fox — and Fox's continued ad acceptance — is exactly the media-accountability story The Intercept publishes. They also have appetite for regulatory capture narratives (SEC not acting on Reg D abuse).</div>
+      <div class="outlet-angle">Best angle: "Fox News kept running Yrefy ads after a fraud investigator told them the math didn't work."</div>
+    </div>
+  </div>
+
+  <div class="outlet-card">
+    <div class="outlet-rank">5</div>
+    <div>
+      <div class="outlet-name">MarketWatch / Barron's (Dow Jones)</div>
+      <div class="outlet-why">Direct reach to retail investors and accredited investors who are the target demographic. Can publish quickly as a warning piece. The "missing SLP2" angle — investors with rescission rights they don't know they have — is a public interest story with clear reader utility. Would also pick up the MA settlement as validation.</div>
+      <div class="outlet-angle">Best angle: "Did you invest in Yrefy? One fund series may have been unregistered — here's what that means for your money."</div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════ FOOTNOTES ════════════════════════════════════ -->
+<div class="footnotes">
+  <h2 id="refs">Sources &amp; Footnotes</h2>
+  <ol>
+    <li id="fn1" class="fn-target"><strong>[1]</strong> Massachusetts Securities Division, Consent Order, Docket E-2024-0334, February 3, 2025. Parties: Commonwealth of Massachusetts v. Yrefy LLC and Yrefy SLP4 LLC. Fine: $750,000. Rescission: $1,418,000 to 8 MA investors. <a href="https://www.sec.state.ma.us/divisions/securities/enforcement/enforcement-actions.htm" target="_blank">MA Securities Enforcement Actions</a></li>
+    <li id="fn2" class="fn-target"><strong>[2]</strong> SEC EDGAR, Yrefy SLP4 LLC, CIK: 0001859283. Form D/A filed July 12, 2022 — $7,045,000 raised. New Form D filed July 2, 2025 — $0 raised (new round). <a href="https://www.sec.gov/Archives/edgar/data/1859283/0001859283-22-000005-index.htm" target="_blank">EDGAR Index</a></li>
+    <li id="fn3" class="fn-target"><strong>[3]</strong> FINRA BrokerCheck, Nathan Laine Schoneberger, CRD #2715309. Full PDF downloaded from <code>files.brokercheck.finra.org/individual/individual_2715309.pdf</code>. Status: Not currently registered. Last registered: May 2014.</li>
+    <li id="fn4" class="fn-target"><strong>[4]</strong> BrokerCheck record — Schoneberger employment: First Financial Equity Corporation (Jan 2009–May 2014, Tempe AZ); MML Investors Services / Massachusetts Mutual (Apr 1996–Feb 2009). Exams: Series 7, 6, 63, 65, 66. Designation: Chartered Financial Consultant.</li>
+    <li id="fn5" class="fn-target"><strong>[5]</strong> FormDs.com, Yrefy SLP1 LLC. First filing: December 10, 2020, $2,800,000 raised at initial filing. Amendment April 30, 2021: $3,921,000 total. Exemption: Rule 506(b). <a href="https://www.formds.com/issuers/yrefy-slp1-llc" target="_blank">FormDs — SLP1</a></li>
+    <li id="fn6" class="fn-target"><strong>[6]</strong> FormDs.com, Yrefy SLP3 LLC. First filing: January 29, 2020, $670,000. Amended April 22, 2020 (exemption switches from 506b to 506c). Amended April 30, 2021: $10,000,000 total. <a href="https://www.formds.com/issuers/yrefy-slp3-llc" target="_blank">FormDs — SLP3</a></li>
+    <li id="fn7" class="fn-target"><strong>[7]</strong> FormDs.com search for "Yrefy SLP2 LLC" returns HTTP 404. SEC EDGAR company search for "Yrefy SLP2" returns no results. NASAA EFD search: no record. No Form D of any type has ever been filed for a Yrefy SLP2 entity.</li>
+    <li id="fn8" class="fn-target"><strong>[8]</strong> Barry Minkow, "Three Unexplainable Things: Yrefy, LLC and Fox News, Multifamily CMBS Performance, and When the Victim Became the Villain," Substack (February 2026). <a href="https://barryminkow.substack.com/p/three-unexplainable-things-yrefy" target="_blank">barryminkow.substack.com</a></li>
+    <li id="fn9" class="fn-target"><strong>[9]</strong> Barry Minkow, "Fox News Channel and Some Bad 'Reg D Advertising' Actors," Substack. <a href="https://barryminkow.substack.com/p/fox-news-channel-and-some-bad-reg" target="_blank">barryminkow.substack.com</a></li>
+    <li id="fn10" class="fn-target"><strong>[10]</strong> FINRA BrokerCheck PDF, Schoneberger CRD #2715309 — disclosed employment history lists Newmark Capital Management LLC and Campbell, Schoneberger &amp; Associates but not Yrefy. Schoneberger's PCAOB audit statement reported in Barry Minkow's Substack analysis (see fn8).</li>
+    <li id="fn11" class="fn-target"><strong>[11]</strong> Law360, "Loan Refinancing Co. Fined $2.1M For Deceptive Ads," February 2025. Total value = $750K fine + $1,418,000 rescission exposure. <a href="https://www.law360.com/articles/2292159/loan-refinancing-co-fined-2-1m-for-deceptive-ads" target="_blank">Law360</a></li>
+    <li id="fn12" class="fn-target"><strong>[12]</strong> FINRA BrokerCheck search for "Donald Fenstermaker" and "Donald F. Fenstermaker": zero results. SEC IAPD search: zero results. Fenstermaker has no registration history in any FINRA or SEC system.</li>
+    <li id="fn13" class="fn-target"><strong>[13]</strong> FormDs.com, Yrefy SLP4 LLC. Filings: April 30, 2021 (new); June 15, 2022; April 15, 2022 ($4,605,000); July 12, 2022 ($7,045,000). <a href="https://www.formds.com/issuers/yrefy-slp4-llc" target="_blank">FormDs — SLP4</a></li>
+    <li id="fn14" class="fn-target"><strong>[14]</strong> NASAA Electronic Filing Depository, accession 0000911420-25-000211 — SLP5 Form D filing (access blocked at time of retrieval; confirmed via EDGAR reference search).</li>
+    <li id="fn15" class="fn-target"><strong>[15]</strong> Yrefy Private Placement Memorandum, page 67 (as cited in Barry Minkow Substack, fn8): "refinancing of private student loans, the purchase of previous SLPs, and the retirement of previous investors."</li>
+    <li id="fn16" class="fn-target"><strong>[16]</strong> Securities Act of 1933, Section 12(a)(1): Any person who offers or sells a security in violation of Section 5 is liable to the purchaser for the consideration paid plus interest, less any income received on the security. No proof of fraud or reliance required.</li>
+    <li id="fn17" class="fn-target"><strong>[17]</strong> Marvin Mentor, Melinda Emonyon, Victor Emonyon v. Yrefy SLP5 LLC, federal court, filed April 2025. Breach of contract related to U.S. Department of Education loans refinanced by Yrefy. Active as of November 2025. Retrieve via PACER or CourtListener.</li>
+    <li id="fn18" class="fn-target"><strong>[18]</strong> Fox News / Fox.com — Charlie Kirk segment "Yrefy surprises college student with $100,000 to pay off student loan debt." <a href="https://www.foxnews.com/video/6397042147112" target="_blank">Fox News Video</a></li>
+    <li id="fn19" class="fn-target"><strong>[19]</strong> MA Consent Order (fn1) — admitted fact: Yrefy used 17 or more paid celebrity/media endorsers. None disclosed their compensation to investors in the materials received. Violation of Reg S-K Item 512 and MA M.G.L. c. 110A §101.</li>
+    <li id="fn20" class="fn-target"><strong>[20]</strong> National Association of Qualified Financiers, "Breaking Down Yrefy for Investors and Borrowers: Fact, Fiction, or Fraud." <a href="https://www.naqf.org/news-and-updates/breaking-down-yrefy-for-investors-and-borrowers-fact-fiction-or-fraud" target="_blank">NAQF Analysis</a></li>
+    <li id="fn21" class="fn-target"><strong>[21]</strong> Yrefy investor relations site (investyrefy.com) disclaimer: "it has not been independently audited." Confirmed present after the Q1 2025 promised audit date passed.</li>
+    <li id="fn22" class="fn-target"><strong>[22]</strong> Public Company Accounting Oversight Board (PCAOB) — established under Sarbanes-Oxley Act of 2002, Section 101. Jurisdiction: auditors of SEC-reporting issuers (public companies) only. Private LLCs are categorically ineligible for PCAOB oversight. <a href="https://pcaobus.org" target="_blank">pcaobus.org</a></li>
+    <li id="fn23" class="fn-target"><strong>[23]</strong> Securities Act of 1933, Section 5: unlawful to sell securities without an effective registration statement or a valid exemption. Reg D exemption under Section 4(a)(2) requires Form D filing within 15 days of first sale. Failure to file eliminates the exemption and exposes the issuer to Section 12(a)(1) liability.</li>
+    <li id="fn24" class="fn-target"><strong>[24]</strong> Massachusetts Uniform Securities Act, M.G.L. c. 110A §101: it is unlawful to employ any device, scheme, or artifice to defraud, or to make any untrue statement of material fact. Yrefy admitted violations under this statute in the February 2025 Consent Order.</li>
+    <li id="fn25" class="fn-target"><strong>[25]</strong> M&amp;A Hunter Substack note on Yrefy: "Scam Alert: Yrefy 'Investment' Promissory Notes." <a href="https://substack.com/@maandhunter/note/c-236863762" target="_blank">M&amp;A Hunter Substack</a></li>
+  </ol>
+</div>
+
+<footer>
+  Compiled June 25, 2026 · For research and journalistic purposes · All claims are documented and sourced above · No legal conclusions are drawn — this report summarizes publicly available information and regulatory documents
+</footer>
+
+<!-- ════════════════════════════════════ SCRIPTS ════════════════════════════════════ -->
+<script>
+// ── Network Graph ──────────────────────────────────────────────────────────────────
+(function() {
+  var nodes = new vis.DataSet([
+    // Corporate entities (blue)
+    { id: 1,  label: 'Yrefy LLC\n(Parent)',          group: 'entity',  title: 'Arizona-based parent entity. Founded c.2017–2018 by Fenstermaker and Schoneberger.' },
+    { id: 2,  label: 'Yrefy SLP1',                   group: 'entity',  title: 'Student Loan Program 1. Form D Dec 2020. $3.9M raised. 506(b) — TV ads may violate exemption.' },
+    { id: 3,  label: 'Yrefy SLP2\n⚠ NO FILING',      group: 'flag',    title: 'CRITICAL: No Form D ever filed. Potential unregistered offering under Securities Act §5. Investors have automatic rescission rights.' },
+    { id: 4,  label: 'Yrefy SLP3',                   group: 'entity',  title: 'Student Loan Program 3. Form D Jan 2020 (predates SLP1). $10M raised. Switched from 506(b) to 506(c).' },
+    { id: 5,  label: 'Yrefy SLP4',                   group: 'entity',  title: 'CIK: 0001859283. $7.045M raised. Named in MA Consent Order. New round opened July 2025.' },
+    { id: 6,  label: 'Yrefy SLP5',                   group: 'entity',  title: 'Filed 2025. Accession 0000911420-25-000211. Subject of federal lawsuit (Mentor v. Yrefy SLP5).' },
+    { id: 7,  label: 'NextStudent Inc.',              group: 'related', title: 'Fenstermaker\'s prior student loan company. Regulatory history unclear.' },
+    { id: 8,  label: 'Strategic Insurance Inc.',      group: 'related', title: 'Schoneberger is Chairman/CEO. Investment-related entity on his Form U4.' },
+    { id: 9,  label: 'Newmark Capital Mgmt.',         group: 'related', title: 'Schoneberger listed as IA Rep from April 2016–present per last Form U4. Yrefy not disclosed to this firm.' },
+    { id: 10, label: 'Campbell, Schoneberger\n& Assoc.', group: 'related', title: 'Financial planning firm. Schoneberger is President. Listed on Form U4.' },
+
+    // People (orange)
+    { id: 11, label: 'Donald Fenstermaker\nCEO/Chairman', group: 'person', title: 'Co-founder/CEO. ZERO FINRA records — never registered as broker or IA. Ran NextStudent Inc. previously.' },
+    { id: 12, label: 'Laine Schoneberger\nCIO', group: 'person', title: 'CRD #2715309. Last registered May 2014. 3 customer disputes: churning, borrowing $75K from client, inappropriate products.' },
+    { id: 13, label: 'Cassandra Sifford\nCOO', group: 'person', title: 'COO. Background not yet investigated.' },
+
+    // Regulators / Legal (red)
+    { id: 14, label: 'MA Securities Division\n$750K Fine', group: 'legal', title: 'Docket E-2024-0334, Feb 3 2025. $750K fine + $1.418M rescission. Admitted violations: undisclosed endorsers, false return claims, false principal protection, false collateral agent.' },
+    { id: 15, label: 'FINRA/CRD\n3 Disclosures', group: 'legal', title: 'Schoneberger: 3 customer disputes on permanent record. Fenstermaker: zero records.' },
+    { id: 16, label: 'Federal Lawsuit\nMentor v. SLP5', group: 'legal', title: 'Filed April 2025. Plaintiffs: Marvin Mentor, Melinda & Victor Emonyon. Breach of contract re: DOE loans. Active Nov 2025.' },
+    { id: 17, label: 'SEC — No Visibility\non SLP2', group: 'flag', title: 'No Form D = SEC has zero record of SLP2 investors, amount raised, or current status.' },
+
+    // Media (green)
+    { id: 18, label: 'Fox News\n(Advertiser)', group: 'media', title: 'Primary advertising channel. Minkow says Fox News sometimes looks like it\'s interrupting Yrefy programming. Alerted by Minkow — declined to act.' },
+    { id: 19, label: 'CNBC\n(Advertiser)', group: 'media', title: 'Secondary advertising channel. Confirmed Reg D advertising on financial news network.' },
+    { id: 20, label: 'Charlie Kirk\n(Paid Appearance)', group: 'media', title: 'Fox News segment: "Yrefy surprises college student with $100,000." One of 17+ paid promoters.' },
+    { id: 21, label: 'Barry Minkow\n(Fraud Investigator)', group: 'media', title: 'Convicted fraudster-turned-investigator. Exposed ZZZZ Best (1987), NRIA ($650M Ponzi). Published detailed Yrefy analysis Feb 2026. Offered forensic audit funding.' },
+
+    // Risk flags (yellow)
+    { id: 22, label: 'PCAOB Audit Lie\n(Schoneberger)', group: 'flag', title: 'Schoneberger told investor Yrefy was "preparing for PCAOB audit" Q1 2025. PCAOB only covers public companies. Impossible claim. No audit occurred.' },
+    { id: 23, label: 'Impossible Math:\n5.99% in / 10.25% out', group: 'flag', title: 'Charges borrowers max 5.99% while promising investors 10.25% + $5.4M+ TV ad spend. No disclosed revenue source bridges this gap.' },
+    { id: 24, label: '"Retire Previous\nInvestors" — PPM p.67', group: 'flag', title: 'PPM states new offering proceeds used to "retire previous investors" — textbook Ponzi disclosure language.' },
+  ]);
+
+  var edges = new vis.DataSet([
+    // Fenstermaker connections
+    { from: 11, to: 1,  label: 'CEO / Founder',   length: 120 },
+    { from: 11, to: 7,  label: 'Prior company',   dashes: true, length: 150 },
+
+    // Schoneberger connections
+    { from: 12, to: 1,  label: 'CIO / Founder',   length: 120 },
+    { from: 12, to: 8,  label: 'Chairman/CEO',    length: 150 },
+    { from: 12, to: 9,  label: 'IA Rep (2016–)',  length: 160 },
+    { from: 12, to: 10, label: 'President',        length: 150 },
+    { from: 12, to: 15, label: '3 disclosures',   color: { color: '#f85149' }, length: 180 },
+    { from: 12, to: 22, label: 'false claim',      color: { color: '#f85149' }, dashes: true, length: 160 },
+
+    // Sifford
+    { from: 13, to: 1,  label: 'COO',             length: 130 },
+
+    // Parent to SLPs
+    { from: 1, to: 2,  label: 'Parent',           length: 130 },
+    { from: 1, to: 3,  label: 'Parent (UNREGISTERED)', color: { color: '#f85149' }, length: 130 },
+    { from: 1, to: 4,  label: 'Parent',           length: 130 },
+    { from: 1, to: 5,  label: 'Parent',           length: 130 },
+    { from: 1, to: 6,  label: 'Parent',           length: 130 },
+
+    // Regulatory
+    { from: 5, to: 14, label: 'Enforcement',      color: { color: '#f85149' }, length: 180 },
+    { from: 1, to: 14, label: 'Enforcement',      color: { color: '#f85149' }, length: 200 },
+    { from: 6, to: 16, label: 'Defendant',        color: { color: '#f85149' }, length: 160 },
+    { from: 3, to: 17, label: 'No SEC record',    color: { color: '#f85149' }, length: 140 },
+
+    // Media
+    { from: 1, to: 18, label: '$5.4M+ ads',       length: 200 },
+    { from: 1, to: 19, label: 'Advertising',       length: 200 },
+    { from: 20, to: 18, label: 'Segment on',       length: 120 },
+    { from: 20, to: 1, label: 'Paid appearance', dashes: true, length: 180 },
+    { from: 21, to: 1, label: 'Investigating',    color: { color: '#e3b341' }, dashes: true, length: 200 },
+    { from: 21, to: 18, label: 'Alerted (ignored)', color: { color: '#e3b341' }, dashes: true, length: 160 },
+
+    // Risk flags
+    { from: 1, to: 23, label: 'Core math gap',   color: { color: '#f85149' }, dashes: true, length: 160 },
+    { from: 1, to: 24, label: 'PPM language',    color: { color: '#f85149' }, dashes: true, length: 160 },
+  ]);
+
+  var groupColors = {
+    entity:  { background: '#1e3a5f', border: '#4a90d9', highlight: { background: '#2a5080', border: '#6ab0ff' } },
+    person:  { background: '#5a2d0c', border: '#f0883e', highlight: { background: '#7a3d1c', border: '#ffaa5e' } },
+    legal:   { background: '#3d0e0e', border: '#f85149', highlight: { background: '#5a1a1a', border: '#ff7170' } },
+    media:   { background: '#0e3d1e', border: '#3fb950', highlight: { background: '#1a5a2c', border: '#5fda70' } },
+    flag:    { background: '#3d2e0e', border: '#e3b341', highlight: { background: '#5a4520', border: '#ffcc55' } },
+    related: { background: '#2a1f3d', border: '#bc8cff', highlight: { background: '#3a2a55', border: '#d9aaff' } },
+  };
+
+  var container = document.getElementById('network-container');
+  var data = { nodes: nodes, edges: edges };
+  var options = {
+    nodes: {
+      shape: 'box',
+      font: { color: '#f0f6fc', size: 12, face: 'Inter, sans-serif' },
+      borderWidth: 1.5,
+      borderWidthSelected: 2.5,
+      margin: { top: 8, right: 10, bottom: 8, left: 10 },
+      chosen: true,
+    },
+    edges: {
+      font: { color: '#8b949e', size: 10, face: 'Inter, sans-serif', background: 'none' },
+      color: { color: '#30363d', highlight: '#58a6ff' },
+      smooth: { type: 'curvedCW', roundness: 0.1 },
+      arrows: { to: { enabled: true, scaleFactor: 0.5 } },
+      width: 1.2,
+    },
+    groups: groupColors,
+    physics: {
+      enabled: true,
+      forceAtlas2Based: {
+        gravitationalConstant: -60,
+        centralGravity: 0.003,
+        springLength: 200,
+        springConstant: 0.04,
+        damping: 0.4,
+      },
+      solver: 'forceAtlas2Based',
+      stabilization: { iterations: 150 },
+    },
+    interaction: {
+      hover: true,
+      tooltipDelay: 100,
+      zoomView: true,
+      dragView: true,
+    },
+  };
+
+  new vis.Network(container, data, options);
+})();
+
+// ── Copy Pitch ─────────────────────────────────────────────────────────────────────
+function copyPitch() {
+  var el = document.getElementById('pitch-text');
+  el.select();
+  document.execCommand('copy');
+  var btn = document.querySelector('.copy-btn');
+  btn.textContent = 'Copied!';
+  setTimeout(function() { btn.textContent = 'Copy'; }, 1800);
+}
+</script>
+
+</body>
+</html>

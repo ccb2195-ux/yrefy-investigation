@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Yrefy LLC — Intelligence Report 2026-07-01</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body { font-family: 'Georgia', serif; background: #0f1117; color: #e0e0e0; margin: 0; padding: 0; }
+    .container { max-width: 1100px; margin: 0 auto; padding: 40px 24px; }
+
+    /* Header */
+    .report-header { border-bottom: 2px solid #c0392b; padding-bottom: 24px; margin-bottom: 40px; }
+    .report-header h1 { font-size: 2rem; color: #fff; margin: 0 0 8px; letter-spacing: -0.5px; }
+    .report-header .meta { color: #777; font-size: 0.82rem; line-height: 1.8; }
+    .risk-badge { display: inline-block; padding: 3px 10px; border-radius: 3px;
+                  font-size: 0.7rem; font-weight: bold; text-transform: uppercase;
+                  letter-spacing: 0.5px; margin-left: 10px; vertical-align: middle; }
+    .risk-high { background: #c0392b; color: #fff; }
+    .print-btn { float: right; background: #1e1e2e; border: 1px solid #3a3a5a;
+                 color: #aaa; padding: 6px 14px; font-size: 0.8rem; cursor: pointer;
+                 border-radius: 3px; font-family: 'Georgia', serif; }
+    .print-btn:hover { background: #2a2a3e; color: #e0e0e0; }
+
+    /* Section headers */
+    h2 { color: #c0392b; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 1.5px;
+         border-bottom: 1px solid #2a2a3a; padding-bottom: 8px; margin-top: 52px; margin-bottom: 20px; }
+
+    /* Tables */
+    table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+    th { text-align: left; padding: 8px 12px; background: #141422; color: #888;
+         font-weight: normal; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.8px; }
+    td { padding: 9px 12px; border-bottom: 1px solid #1c1c2c; vertical-align: top; line-height: 1.5; }
+    tr:hover td { background: #13131f; }
+    td:first-child { color: #aaa; }
+
+    /* Timeline */
+    .timeline { position: relative; padding-left: 36px; margin-top: 4px; }
+    .timeline::before { content: ''; position: absolute; left: 10px; top: 6px;
+                        bottom: 6px; width: 2px; background: #222233; }
+    .tl-item { position: relative; margin-bottom: 22px; }
+    .tl-dot { position: absolute; left: -30px; top: 5px; width: 14px; height: 14px;
+              border-radius: 50%; border: 2px solid #0f1117; }
+    .tl-dot.founding  { background: #27ae60; }
+    .tl-dot.filing    { background: #3498db; }
+    .tl-dot.action    { background: #e74c3c; box-shadow: 0 0 7px #e74c3c99; }
+    .tl-dot.lawsuit   { background: #e67e22; }
+    .tl-dot.media     { background: #9b59b6; }
+    .tl-date  { font-size: 0.72rem; color: #666; margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .tl-title { font-weight: bold; color: #ddd; font-size: 0.92rem; }
+    .tl-body  { font-size: 0.83rem; color: #999; margin-top: 4px; line-height: 1.55; }
+
+    /* SVG network */
+    .graph-wrap { background: #080810; border: 1px solid #222233;
+                  border-radius: 6px; overflow: hidden; margin-top: 4px; }
+    .graph-legend { display: flex; flex-wrap: wrap; gap: 14px; padding: 12px 18px;
+                    background: #0c0c18; border-top: 1px solid #1e1e2e; font-size: 0.75rem; color: #888; }
+    .legend-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%;
+                  margin-right: 5px; vertical-align: middle; }
+
+    /* Leads */
+    .lead-item { border-left: 3px solid #e67e22; padding: 10px 16px; margin-bottom: 12px;
+                 background: #11111c; border-radius: 0 4px 4px 0; }
+    .lead-priority { font-size: 0.68rem; color: #e67e22; text-transform: uppercase;
+                     font-weight: bold; letter-spacing: 0.5px; }
+    .lead-priority.medium { color: #f39c12; }
+    .lead-title { font-weight: bold; margin: 4px 0 3px; font-size: 0.92rem; color: #ddd; }
+    .lead-body  { font-size: 0.82rem; color: #888; line-height: 1.55; }
+
+    /* Allegation boxes */
+    .allegation-box { background: #150d0d; border: 1px solid #4a1515;
+                      border-radius: 4px; padding: 12px 16px; margin-bottom: 10px;
+                      font-size: 0.83rem; color: #bbb; line-height: 1.55; }
+    .allegation-label { color: #e74c3c; font-size: 0.68rem; text-transform: uppercase;
+                        font-weight: bold; letter-spacing: 0.5px; margin-bottom: 5px; }
+
+    /* Coverage gaps */
+    .gap-ok      { color: #27ae60; font-size: 0.8rem; }
+    .gap-miss    { color: #e74c3c; font-size: 0.8rem; }
+    .gap-partial { color: #e67e22; font-size: 0.8rem; }
+
+    /* Footnotes */
+    .footnotes { margin-top: 52px; padding-top: 18px; border-top: 1px solid #1e1e2e;
+                 font-size: 0.77rem; color: #555; line-height: 1.9; }
+    .footnotes a { color: #4a6fa5; text-decoration: none; }
+    .footnotes a:hover { text-decoration: underline; }
+    sup { color: #4a6fa5; font-size: 0.68rem; }
+    .fn-num { color: #4a6fa5; margin-right: 4px; }
+
+    /* Report footer */
+    .report-footer { margin-top: 40px; padding-top: 14px; border-top: 1px solid #1a1a2a;
+                     font-size: 0.72rem; color: #444; }
+
+    @media print {
+      body { background: #fff; color: #111; }
+      .print-btn { display: none; }
+      h2 { color: #900; }
+      .lead-item { background: #f9f6f2; }
+      .allegation-box { background: #fff5f5; border-color: #d00; }
+      .graph-wrap { border-color: #ccc; }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ═══════════════════════════════════════════════════════ HEADER -->
+  <div class="report-header">
+    <button class="print-btn" onclick="window.print()">Print / Save PDF</button>
+    <h1>Yrefy LLC <span class="risk-badge risk-high">High Risk</span></h1>
+    <div class="meta">
+      Intelligence Report &nbsp;·&nbsp; July 1, 2026 &nbsp;·&nbsp;
+      Sources: Enigma &nbsp;·&nbsp; OpenSanctions &nbsp;·&nbsp; GDELT &nbsp;·&nbsp;
+      SEC EDGAR &nbsp;·&nbsp; MA Securities Division &nbsp;·&nbsp; Web<br>
+      Subject: Private student loan specialty lender / Reg&nbsp;D investor offering &nbsp;·&nbsp;
+      Phoenix, AZ &nbsp;·&nbsp; Founded 2017
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ KNOWN FACTS -->
+  <h2>Known Facts</h2>
+  <table>
+    <tr><th>Field</th><th>Detail</th><th>Src</th></tr>
+    <tr><td>Legal name</td><td>Yrefy LLC</td><td><sup>[2]</sup></td></tr>
+    <tr><td>Headquarters</td><td>6910 E Chauncey Ln, Suite 105, Phoenix, AZ 85054</td><td><sup>[1][9]</sup></td></tr>
+    <tr><td>Founded</td><td>2017 (PitchBook); company claims 2001 operational history</td><td><sup>[2]</sup></td></tr>
+    <tr><td>BBB accreditation</td><td>A+ rating; accredited April 18, 2017</td><td><sup>[12]</sup></td></tr>
+    <tr><td>Employees (Mar 2026)</td><td>~132</td><td><sup>[2]</sup></td></tr>
+    <tr><td>Capital raised</td><td>$16.7M (PitchBook)</td><td><sup>[2]</sup></td></tr>
+    <tr><td>Business model</td><td>Purchases defaulted private student loans at 35–40% discount; refinances to borrowers at 1–5.99%; funds via Reg D 506(c) promissory notes to accredited investors at up to 10.25% stated return, 5-year hold, $50K minimum</td><td><sup>[5][13]</sup></td></tr>
+    <tr><td>Chairman &amp; CEO</td><td>Donald F. Fenstermaker — 31 yrs experience; ex-CEO NextStudent (originated $7B in student loans)</td><td><sup>[8]</sup></td></tr>
+    <tr><td>CIO &amp; Co-Founder</td><td>Laine Schoneberger — 25 yrs financial services; architect of Yrefy investor product</td><td><sup>[8]</sup></td></tr>
+    <tr><td>Known fund entities</td><td>Yrefy SLP1, LLC · Yrefy SLP3, LLC (historical Reg D) · Yrefy SLP4, LLC (Suite 130) · Yrefy SLP5, LLC (Suite 210)</td><td><sup>[9][13]</sup></td></tr>
+    <tr><td>SEC regulation type</td><td>Reg D Rule 506(c) private placement — accredited investors only; Form D filed; not a registered public company</td><td><sup>[13]</sup></td></tr>
+    <tr><td>MA Consent Order</td><td>Feb 3, 2025 — Docket E-2024-0334 — $750,000 administrative fine; permanent cease-and-desist; rescission offers to 8 MA investors (~$1.42M at risk); total exposure ~$2.17M</td><td><sup>[1][3]</sup></td></tr>
+    <tr><td>MA violations found</td><td>Undisclosed paid endorsements (17+ media personalities); misleading investors re: fixed return rate and early withdrawal penalties; communications not fair and balanced</td><td><sup>[1]</sup></td></tr>
+    <tr><td>Named endorser (MA)</td><td>Larry Elder (conservative commentator); 17+ others unnamed in public record</td><td><sup>[1][3]</sup></td></tr>
+    <tr><td>SLP5 endorser</td><td>Savannah Chrisley (reality TV) used in SLP5 Facebook promos</td><td><sup>[11]</sup></td></tr>
+    <tr><td>Active federal lawsuit</td><td>EMONYON et al v. YREFY, LLC et al — Case 1:25-cv-04586 — USDC District of New Jersey — Judge Renee Marie Bumb — Breach of contract (SLP5 promissory notes) — Filed April 2025 — Last activity Nov 2025</td><td><sup>[6][14]</sup></td></tr>
+    <tr><td>OpenSanctions result</td><td>No matches on "Yrefi" or "Yrefy" (Company, US)</td><td>OS</td></tr>
+    <tr><td>State registration footprint</td><td>AZ (home) · Iowa · Oregon · Pennsylvania · Connecticut · DC · Florida (SLP4/5 confirmed across registries)</td><td><sup>[9][10]</sup></td></tr>
+    <tr><td>States excluded from offering</td><td>CA, NY, WA, IN, CT, ME (and others) — whether voluntary or regulatory bar is unconfirmed</td><td><sup>[11]</sup></td></tr>
+    <tr><td>Product rating</td><td>C+ (EducationData) for student loan refinance; A+ BBB business rating</td><td><sup>[17]</sup></td></tr>
+  </table>
+
+  <!-- ═══════════════════════════════════════════════════════ TIMELINE -->
+  <h2>Timeline of Key Events</h2>
+  <div class="timeline">
+
+    <div class="tl-item">
+      <div class="tl-dot founding"></div>
+      <div class="tl-date">2017</div>
+      <div class="tl-title">Yrefy LLC founded</div>
+      <div class="tl-body">Donald F. Fenstermaker and Laine Schoneberger establish Yrefy LLC in Arizona.
+        Fenstermaker previously led NextStudent, originating $7B in student loans.<sup>[2][8]</sup></div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot filing"></div>
+      <div class="tl-date">April 18, 2017</div>
+      <div class="tl-title">BBB accreditation</div>
+      <div class="tl-body">Yrefy LLC receives BBB accreditation; achieves A+ rating.<sup>[12]</sup></div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot filing"></div>
+      <div class="tl-date">~2019–2021</div>
+      <div class="tl-title">SLP1 and SLP3 Reg D offerings raised</div>
+      <div class="tl-body">SEC Form D filings confirm at least SLP1, LLC and SLP3, LLC as prior fundraising vehicles.
+        SLP2 is implied by the sequence but not confirmed in any registry searched — a coverage gap.<sup>[9]</sup></div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot filing"></div>
+      <div class="tl-date">February 17, 2022</div>
+      <div class="tl-title">SLP4, LLC formed and subscription docs issued</div>
+      <div class="tl-body">Yrefy SLP4, LLC (Delaware) formed; subscription documentation dated Feb 17, 2022 available
+        via IRA Club. Suite 130 at 6910 E Chauncey Ln. Minimum investment $50K; up to 10.25% stated return;
+        5-year hold; Reg D 506(c).<sup>[13][9]</sup></div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot action"></div>
+      <div class="tl-date">2022–2024</div>
+      <div class="tl-title">Fox News ad campaign with undisclosed paid endorsers</div>
+      <div class="tl-body">Yrefy runs high-frequency radio and TV advertising on Fox News and conservative media.
+        At least 17 media personalities paid to endorse the SLP4 offering using substantially similar scripts,
+        without required disclosures that the endorsers were compensated. Larry Elder identified by name
+        in the MA consent order.<sup>[1][7]</sup></div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot filing"></div>
+      <div class="tl-date">July 2023</div>
+      <div class="tl-title">FTC adopts updated endorsement disclosure rules</div>
+      <div class="tl-body">FTC finalizes rules requiring disclosure of paid endorsements. This becomes the
+        legal hook for the Massachusetts investigation into Yrefy's advertising practices.<sup>[5]</sup></div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot action"></div>
+      <div class="tl-date">2024</div>
+      <div class="tl-title">Massachusetts Securities Division opens investigation</div>
+      <div class="tl-body">MA Securities Division initiates Docket E-2024-0334 against Yrefy LLC and
+        Yrefy SLP4, LLC targeting the undisclosed endorsement campaign.<sup>[1]</sup></div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot media"></div>
+      <div class="tl-date">~Q4 2024</div>
+      <div class="tl-title">Schoneberger claims "PCAOB audit" to potential investors</div>
+      <div class="tl-body">Laine Schoneberger tells potential investors Yrefy is "preparing for a PCAOB audit."
+        Minkow notes PCAOB audits apply only to public companies, not private entities like Yrefy. No audit
+        materialized. <em>(Unverified — see Allegations section.)</em><sup>[7]</sup></div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot filing"></div>
+      <div class="tl-date">Early 2025</div>
+      <div class="tl-title">SLP5, LLC formed — new fundraising tranche</div>
+      <div class="tl-body">Yrefy SLP5, LLC registered at Suite 210, 6910 E Chauncey Ln (separate suite from SLP4's
+        Suite 130). Savannah Chrisley (reality TV personality) used in SLP5 Facebook promotional posts.
+        SLP5 registered in CT and DC.<sup>[9][11]</sup></div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot action"></div>
+      <div class="tl-date">February 3, 2025</div>
+      <div class="tl-title">Massachusetts Consent Order — $2.17M total exposure ★</div>
+      <div class="tl-body">
+        Commonwealth of Massachusetts Securities Division issues Consent Order (Docket E-2024-0334).<br><br>
+        <strong>Respondents:</strong> Yrefy LLC and Yrefy SLP4, LLC<br>
+        <strong>Violations:</strong> Failure to disclose 17+ paid endorsers; misleading investors about
+        fixed return rates and early withdrawal penalties; communications not fair and balanced;
+        targeting older Massachusetts residents.<br>
+        <strong>Penalties:</strong> $750,000 administrative fine · Permanent censure &amp; cease-and-desist ·
+        Rescission offers required to all 8 MA SLP4 investors (total ~$1,418,000 invested)<br>
+        <strong>Total exposure:</strong> ~$2.17M<sup>[1][3][4]</sup>
+      </div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot lawsuit"></div>
+      <div class="tl-date">April 2025</div>
+      <div class="tl-title">Federal breach-of-contract lawsuit filed (NJ)</div>
+      <div class="tl-body">Marvin Mentor, Melinda Emonyon, and Victor Emonyon file breach-of-contract
+        complaint against Yrefy SLP5, LLC in USDC District of New Jersey.
+        Case 1:25-cv-04586. Judge Renee Marie Bumb. No judgment; no liability established.
+        Last docket activity: November 2025.<sup>[6][14]</sup></div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot media"></div>
+      <div class="tl-date">Early 2026</div>
+      <div class="tl-title">Barry Minkow publishes Ponzi-structure allegations</div>
+      <div class="tl-body">Minkow (convicted fraudster turned fraud investigator) publishes
+        "Three Unexplainable Things About Yrefy" on Substack, alleging Ponzi-like characteristics,
+        absence of audited financials, and a false PCAOB audit claim. No independent verification.
+        <em>(See Allegations section for credibility notes.)</em><sup>[7]</sup></div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot filing"></div>
+      <div class="tl-date">March 2026</div>
+      <div class="tl-title">SLP4 and SLP5 remain Active in DC registry</div>
+      <div class="tl-body">Enigma Gov Archive confirms both Yrefy SLP4, LLC and Yrefy SLP5, LLC
+        listed as "Active — In Good Standing" in the DC Beneficial Owners registry as of March 23, 2026.
+        Both are registered as Foreign Limited Liability Companies.<sup>[9]</sup></div>
+    </div>
+
+    <div class="tl-item">
+      <div class="tl-dot filing"></div>
+      <div class="tl-date">July 1, 2026 (present)</div>
+      <div class="tl-title">Current status</div>
+      <div class="tl-body">~132 employees (PitchBook Mar 2026). $16.7M raised. NJ lawsuit active.
+        No further public regulatory action found. AZ DIFI oversight ongoing.<sup>[2]</sup></div>
+    </div>
+
+  </div><!-- /timeline -->
+
+  <!-- ══════════════════════════════════════════════ ENTITY NETWORK -->
+  <h2>Entity Network</h2>
+  <div class="graph-wrap">
+    <svg viewBox="0 0 900 450" style="width:100%;display:block;" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#444"/>
+        </marker>
+        <marker id="arr-red" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#c0392b88"/>
+        </marker>
+        <marker id="arr-orange" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#e67e2288"/>
+        </marker>
+      </defs>
+
+      <!-- ── EDGES ── -->
+      <!-- Fenstermaker → Yrefy -->
+      <line x1="155" y1="95" x2="415" y2="185" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+      <text x="275" y="128" fill="#555" font-size="9" text-anchor="middle" font-style="italic">leads</text>
+
+      <!-- Schoneberger → Yrefy -->
+      <line x1="305" y1="88" x2="420" y2="177" stroke="#444" stroke-width="1.5" marker-end="url(#arr)"/>
+      <text x="358" y="120" fill="#555" font-size="9" text-anchor="middle" font-style="italic">co-founded</text>
+
+      <!-- 17+ endorsers → Yrefy -->
+      <line x1="112" y1="155" x2="412" y2="195" stroke="#444" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+      <text x="255" y="163" fill="#555" font-size="9" text-anchor="middle" font-style="italic">paid endorsers (MA)</text>
+
+      <!-- Larry Elder → Yrefy -->
+      <line x1="108" y1="240" x2="412" y2="208" stroke="#444" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+      <text x="255" y="237" fill="#555" font-size="9" text-anchor="middle" font-style="italic">endorser (MA, named)</text>
+
+      <!-- Savannah → SLP5 -->
+      <line x1="105" y1="348" x2="582" y2="358" stroke="#444" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+      <text x="340" y="340" fill="#555" font-size="9" text-anchor="middle" font-style="italic">SLP5 endorser</text>
+
+      <!-- Minkow → Yrefy -->
+      <line x1="560" y1="88" x2="482" y2="175" stroke="#c0392b55" stroke-width="1.2" stroke-dasharray="3,3" marker-end="url(#arr-red)"/>
+      <text x="528" y="120" fill="#c0392b88" font-size="9" text-anchor="middle" font-style="italic">investigates</text>
+
+      <!-- Yrefy → SLP1 -->
+      <line x1="430" y1="230" x2="230" y2="368" stroke="#3a3a5a" stroke-width="1.5" marker-end="url(#arr)"/>
+      <text x="318" y="315" fill="#555" font-size="9" text-anchor="middle" font-style="italic">controls</text>
+
+      <!-- Yrefy → SLP3 -->
+      <line x1="440" y1="232" x2="355" y2="368" stroke="#3a3a5a" stroke-width="1.5" marker-end="url(#arr)"/>
+
+      <!-- Yrefy → SLP4 -->
+      <line x1="453" y1="232" x2="468" y2="368" stroke="#3a3a5a" stroke-width="1.5" marker-end="url(#arr)"/>
+
+      <!-- Yrefy → SLP5 -->
+      <line x1="468" y1="225" x2="590" y2="365" stroke="#3a3a5a" stroke-width="1.5" marker-end="url(#arr)"/>
+
+      <!-- MA Securities → SLP4 (enforcement) -->
+      <line x1="660" y1="105" x2="488" y2="368" stroke="#c0392b66" stroke-width="2" marker-end="url(#arr-red)"/>
+      <text x="598" y="235" fill="#c0392b99" font-size="9" text-anchor="middle" font-style="italic">consent order</text>
+
+      <!-- AZ DIFI → Yrefy -->
+      <line x1="752" y1="220" x2="492" y2="207" stroke="#3498db55" stroke-width="1.5" marker-end="url(#arr)"/>
+      <text x="625" y="208" fill="#3498db66" font-size="9" text-anchor="middle" font-style="italic">regulates</text>
+
+      <!-- Emonyon → SLP5 -->
+      <line x1="760" y1="378" x2="638" y2="385" stroke="#e67e2299" stroke-width="1.8" marker-end="url(#arr-orange)"/>
+      <text x="700" y="368" fill="#e67e2299" font-size="9" text-anchor="middle" font-style="italic">suing (breach)</text>
+
+      <!-- ── NODES ── -->
+
+      <!-- Yrefy LLC — center, primary -->
+      <g transform="translate(450,202)">
+        <circle r="40" fill="#1a3d2a" stroke="#27ae60" stroke-width="2.5"/>
+        <text text-anchor="middle" dy="-6" fill="#e0e0e0" font-size="11" font-weight="bold">Yrefy</text>
+        <text text-anchor="middle" dy="9" fill="#e0e0e0" font-size="11" font-weight="bold">LLC</text>
+        <text text-anchor="middle" dy="58" fill="#888" font-size="9">Operating Co.</text>
+      </g>
+
+      <!-- Fenstermaker -->
+      <g transform="translate(145,75)">
+        <circle r="28" fill="#2a1a3d" stroke="#9b59b6" stroke-width="2"/>
+        <text text-anchor="middle" dy="-5" fill="#d0c0e0" font-size="9">Fenstermaker</text>
+        <text text-anchor="middle" dy="7" fill="#d0c0e0" font-size="9">Chairman/CEO</text>
+        <text text-anchor="middle" dy="42" fill="#888" font-size="8">Individual</text>
+      </g>
+
+      <!-- Schoneberger -->
+      <g transform="translate(300,72)">
+        <circle r="28" fill="#2a1a3d" stroke="#9b59b6" stroke-width="2"/>
+        <text text-anchor="middle" dy="-5" fill="#d0c0e0" font-size="9">Schoneberger</text>
+        <text text-anchor="middle" dy="7" fill="#d0c0e0" font-size="9">CIO/Co-Founder</text>
+        <text text-anchor="middle" dy="42" fill="#888" font-size="8">Individual</text>
+      </g>
+
+      <!-- 17+ endorsers (unnamed) -->
+      <g transform="translate(95,142)">
+        <circle r="22" fill="#1e1e1e" stroke="#95a5a6" stroke-width="1.5" stroke-dasharray="3,2"/>
+        <text text-anchor="middle" dy="-4" fill="#aaa" font-size="8">17+ Media</text>
+        <text text-anchor="middle" dy="7" fill="#aaa" font-size="8">Personalities</text>
+        <text text-anchor="middle" dy="36" fill="#666" font-size="8">(unnamed)</text>
+      </g>
+
+      <!-- Larry Elder -->
+      <g transform="translate(88,240)">
+        <circle r="22" fill="#1e1e1e" stroke="#95a5a6" stroke-width="1.5"/>
+        <text text-anchor="middle" dy="-4" fill="#aaa" font-size="8">Larry</text>
+        <text text-anchor="middle" dy="7" fill="#aaa" font-size="8">Elder</text>
+        <text text-anchor="middle" dy="36" fill="#666" font-size="8">Endorser</text>
+      </g>
+
+      <!-- Savannah Chrisley -->
+      <g transform="translate(78,345)">
+        <circle r="22" fill="#1e1e1e" stroke="#95a5a6" stroke-width="1.5"/>
+        <text text-anchor="middle" dy="-4" fill="#aaa" font-size="8">Savannah</text>
+        <text text-anchor="middle" dy="7" fill="#aaa" font-size="8">Chrisley</text>
+        <text text-anchor="middle" dy="36" fill="#666" font-size="8">SLP5 Endorser</text>
+      </g>
+
+      <!-- Barry Minkow -->
+      <g transform="translate(565,72)">
+        <circle r="22" fill="#220a0a" stroke="#c0392b" stroke-width="1.5" stroke-dasharray="4,2"/>
+        <text text-anchor="middle" dy="-4" fill="#e08080" font-size="8">Barry</text>
+        <text text-anchor="middle" dy="7" fill="#e08080" font-size="8">Minkow</text>
+        <text text-anchor="middle" dy="36" fill="#666" font-size="8">Investigator</text>
+      </g>
+
+      <!-- MA Securities Division -->
+      <g transform="translate(672,78)">
+        <circle r="30" fill="#0d1e33" stroke="#3498db" stroke-width="2"/>
+        <text text-anchor="middle" dy="-7" fill="#a0c0e0" font-size="8">MA Securities</text>
+        <text text-anchor="middle" dy="4" fill="#a0c0e0" font-size="8">Division</text>
+        <text text-anchor="middle" dy="15" fill="#a0c0e0" font-size="8">$750K Order</text>
+        <text text-anchor="middle" dy="47" fill="#888" font-size="8">Regulator</text>
+      </g>
+
+      <!-- AZ DIFI -->
+      <g transform="translate(772,218)">
+        <circle r="24" fill="#0d1e33" stroke="#3498db" stroke-width="1.5"/>
+        <text text-anchor="middle" dy="-4" fill="#a0c0e0" font-size="8">AZ DIFI</text>
+        <text text-anchor="middle" dy="7" fill="#a0c0e0" font-size="8">Home State</text>
+        <text text-anchor="middle" dy="38" fill="#888" font-size="8">Regulator</text>
+      </g>
+
+      <!-- SLP1 -->
+      <g transform="translate(218,385)">
+        <circle r="24" fill="#132212" stroke="#2ecc71" stroke-width="1.5" stroke-dasharray="3,2" opacity="0.7"/>
+        <text text-anchor="middle" dy="-4" fill="#aaa" font-size="8">SLP1, LLC</text>
+        <text text-anchor="middle" dy="7" fill="#aaa" font-size="8">(Reg D)</text>
+        <text text-anchor="middle" dy="38" fill="#666" font-size="8">Historical</text>
+      </g>
+
+      <!-- SLP3 -->
+      <g transform="translate(348,388)">
+        <circle r="24" fill="#132212" stroke="#2ecc71" stroke-width="1.5" stroke-dasharray="3,2" opacity="0.7"/>
+        <text text-anchor="middle" dy="-4" fill="#aaa" font-size="8">SLP3, LLC</text>
+        <text text-anchor="middle" dy="7" fill="#aaa" font-size="8">(Reg D)</text>
+        <text text-anchor="middle" dy="38" fill="#666" font-size="8">Historical</text>
+      </g>
+
+      <!-- SLP4 — MA enforcement target -->
+      <g transform="translate(474,385)">
+        <circle r="28" fill="#1a0d0d" stroke="#e74c3c" stroke-width="2"/>
+        <text text-anchor="middle" dy="-6" fill="#e0a0a0" font-size="9" font-weight="bold">SLP4, LLC</text>
+        <text text-anchor="middle" dy="6" fill="#e0a0a0" font-size="8">Suite 130</text>
+        <text text-anchor="middle" dy="44" fill="#e74c3c" font-size="8">⚠ MA Enforcement</text>
+      </g>
+
+      <!-- SLP5 — NJ lawsuit -->
+      <g transform="translate(610,385)">
+        <circle r="28" fill="#1a1205" stroke="#e67e22" stroke-width="2"/>
+        <text text-anchor="middle" dy="-6" fill="#e0c080" font-size="9" font-weight="bold">SLP5, LLC</text>
+        <text text-anchor="middle" dy="6" fill="#e0c080" font-size="8">Suite 210</text>
+        <text text-anchor="middle" dy="44" fill="#e67e22" font-size="8">⚠ NJ Lawsuit</text>
+      </g>
+
+      <!-- Emonyon Plaintiffs -->
+      <g transform="translate(782,385)">
+        <circle r="26" fill="#1a1205" stroke="#e67e22" stroke-width="1.8"/>
+        <text text-anchor="middle" dy="-7" fill="#e0c080" font-size="8">Emonyon</text>
+        <text text-anchor="middle" dy="4" fill="#e0c080" font-size="8">et al</text>
+        <text text-anchor="middle" dy="15" fill="#e0c080" font-size="8">(3 plaintiffs)</text>
+        <text text-anchor="middle" dy="42" fill="#888" font-size="8">Plaintiffs</text>
+      </g>
+
+    </svg>
+    <div class="graph-legend">
+      <span><span class="legend-dot" style="background:#27ae60"></span>Operating entity</span>
+      <span><span class="legend-dot" style="background:#2ecc71;opacity:0.6"></span>Historical fund (Reg D)</span>
+      <span><span class="legend-dot" style="background:#e74c3c"></span>Enforcement target</span>
+      <span><span class="legend-dot" style="background:#e67e22"></span>Lawsuit / plaintiffs</span>
+      <span><span class="legend-dot" style="background:#9b59b6"></span>Leadership (individuals)</span>
+      <span><span class="legend-dot" style="background:#3498db"></span>Regulators</span>
+      <span><span class="legend-dot" style="background:#95a5a6"></span>Endorsers / external</span>
+      <span><span class="legend-dot" style="background:#c0392b"></span>Investigative</span>
+      <span style="color:#555">── dashed = unconfirmed / alleged relationship</span>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════ KEY LEADS -->
+  <h2>Key Leads to Pursue</h2>
+
+  <div class="lead-item">
+    <div class="lead-priority">High Priority</div>
+    <div class="lead-title">Identity of the 17 unnamed paid endorsers</div>
+    <div class="lead-body">The MA consent order names Larry Elder but references 16+ other media personalities.
+      FOIA the full evidentiary record for Docket E-2024-0334 from the MA Securities Division — endorser
+      contracts and scripts should be in the case file. Cross-reference against Fox News advertising logs,
+      conservative talk radio schedules, and financial podcasts 2022–2024.</div>
+  </div>
+
+  <div class="lead-item">
+    <div class="lead-priority">High Priority</div>
+    <div class="lead-title">NJ lawsuit complaint text (PACER)</div>
+    <div class="lead-body">Case 1:25-cv-04586 (USDC NJ) is the most important open legal document in this file.
+      The full complaint would describe whether the breach involves payment default, misrepresentation,
+      or a structural issue with SLP5. Pull via PACER or check RECAP Archive for a free copy.
+      Last activity was November 2025 — check for any summary judgment or settlement motion.</div>
+  </div>
+
+  <div class="lead-item">
+    <div class="lead-priority">High Priority</div>
+    <div class="lead-title">SLP5 endorser disclosures post-MA consent order</div>
+    <div class="lead-body">Savannah Chrisley's SLP5 Facebook promos appear to postdate the Feb 2025 MA consent
+      order. If those materials lack proper paid-endorser disclosures, Yrefy may be in violation of the
+      cease-and-desist order it just signed. Compare SLP5 ad materials against the MA consent order terms
+      and FTC endorsement disclosure requirements. Check whether AZ DIFI was notified.</div>
+  </div>
+
+  <div class="lead-item">
+    <div class="lead-priority">High Priority</div>
+    <div class="lead-title">Verify or refute the PCAOB audit claim</div>
+    <div class="lead-body">Schoneberger told potential investors in ~Q4 2024 that Yrefy was "preparing for a
+      PCAOB audit." PCAOB audits apply only to SEC-registered public companies, not private LLCs. If this
+      statement was made in investor communications, it may constitute a material misrepresentation under
+      securities law. Request Yrefy's investor communications from late 2024 via rescission offer process
+      (MA investors have this right) or from the MA case file.</div>
+  </div>
+
+  <div class="lead-item">
+    <div class="lead-priority medium">Medium Priority</div>
+    <div class="lead-title">SLP2 — the missing fund</div>
+    <div class="lead-body">SEC Form D confirms SLP1 and SLP3 exist. SLP2 is conspicuously absent from all
+      registries searched. Either it was never formed, failed to file Form D (itself a violation), or was
+      formed under an alternate name. Search SEC EDGAR directly for "Yrefy SLP2" and Arizona SOS records.
+      If SLP2 raised money without a Form D, that is a separate securities law violation.</div>
+  </div>
+
+  <div class="lead-item">
+    <div class="lead-priority medium">Medium Priority</div>
+    <div class="lead-title">Actual beneficial owners of SLP4 and SLP5</div>
+    <div class="lead-body">The DC Beneficial Owners registry confirmed entity registration status but did not
+      surface individual owner names. Check FinCEN's BOI (Beneficial Ownership Information) database for
+      CTA filings, which may have been required for the SLP entities. The IRA Club subscription docs
+      (public) list investor certification requirements but not the actual investors.</div>
+  </div>
+
+  <div class="lead-item">
+    <div class="lead-priority medium">Medium Priority</div>
+    <div class="lead-title">State licensing in excluded jurisdictions</div>
+    <div class="lead-body">Yrefy excludes CA, NY, WA, IN, CT, ME and other states from its offering.
+      Determine whether these are voluntary exclusions or the result of denied licensing applications or
+      regulatory bars. Contact each state's securities division directly — a denied application is a
+      different risk signal than a voluntary choice to exclude a state.</div>
+  </div>
+
+  <div class="lead-item">
+    <div class="lead-priority medium">Medium Priority</div>
+    <div class="lead-title">Fenstermaker's NextStudent background</div>
+    <div class="lead-body">NextStudent was among the largest privately held student loan companies before
+      the 2010 private student loan market collapse. Confirm whether it wound down in good standing or
+      under financial/regulatory pressure. Check EDGAR for any SEC filings, and Arizona/Delaware SOS
+      for dissolution records. This would contextualize Fenstermaker's risk profile significantly.</div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ ALLEGATIONS -->
+  <h2>Allegations &amp; Unverified Claims</h2>
+  <p style="font-size:0.8rem;color:#666;margin-top:-10px;margin-bottom:16px;">
+    The following claims have not been adjudicated or independently verified. They are reported as
+    disclosed by their sources, not as established facts.
+  </p>
+
+  <div class="allegation-box">
+    <div class="allegation-label">Unverified — Source: Barry Minkow, Substack (Early 2026)<sup>[7]</sup></div>
+    <strong>Ponzi-like structure alleged.</strong> Minkow claims Yrefy pays existing investors primarily
+    from new investor capital rather than from sustainable loan portfolio performance — a classic Ponzi
+    hallmark. He cites the heavy radio advertising as evidence of a "desperate need to raise new money."
+    No audited financials have been provided to investors to confirm or deny this. Credibility caveat:
+    Minkow is a convicted fraudster (ZZZZ Best carpet-cleaning fraud, 1988) who now runs a fraud
+    investigation newsletter. His allegations require independent verification before being treated as findings.
+  </div>
+
+  <div class="allegation-box">
+    <div class="allegation-label">Unverified — Source: Barry Minkow, Substack (Early 2026)<sup>[7]</sup></div>
+    <strong>No audited financial statements.</strong> Minkow states Yrefy has never provided audited
+    financial statements to potential investors. The company's default rate data (2017–2025) is explicitly
+    noted on its disclosures page as "not independently audited." Schoneberger's claim of a pending PCAOB
+    audit (which applies only to public companies) is alleged to have been used to deflect investor
+    requests for audited financials.
+  </div>
+
+  <div class="allegation-box">
+    <div class="allegation-label">Unverified — Source: Facebook / Student Loan Justice Group</div>
+    <strong>Predatory borrower practices alleged.</strong> A post in the Student Loan Justice Group
+    Facebook community accused Yrefy of predatory practices toward borrowers. No adjudicated finding;
+    no specific named complainant identified in public sources.
+  </div>
+
+  <div class="allegation-box">
+    <div class="allegation-label">Adjudicated / Confirmed — Source: MA Securities Division<sup>[1]</sup></div>
+    <strong>Note on the MA consent order:</strong> The violations found by Massachusetts — undisclosed
+    paid endorsements and materially misleading investor communications — are <em>confirmed findings</em>
+    by a regulator, not allegations. They are listed here only to distinguish them from the unverified
+    claims above. Yrefy agreed to the consent order without admitting or denying the specific findings.
+  </div>
+
+  <!-- ══════════════════════════════════════════ COVERAGE GAPS -->
+  <h2>Coverage Gaps</h2>
+  <table class="gap-table">
+    <tr><th>Source</th><th>Status</th><th>Notes</th></tr>
+    <tr>
+      <td>GDELT adverse media (past 3 months)</td>
+      <td class="gap-miss">Rate-limited</td>
+      <td>HTTP 429 on all attempts. Web search substituted as a proxy for recent coverage.</td>
+    </tr>
+    <tr>
+      <td>OpenSanctions</td>
+      <td class="gap-ok">Checked — no hits</td>
+      <td>Searched both "Yrefi" and "Yrefy" as Company/US. Zero matches. Absence of a hit is itself useful.</td>
+    </tr>
+    <tr>
+      <td>CourtListener (federal dockets)</td>
+      <td class="gap-miss">Auth required</td>
+      <td>MCP server needs authentication. Federal litigation cannot be confirmed or cleared beyond the NJ case found via web search.</td>
+    </tr>
+    <tr>
+      <td>SEC EDGAR full-text search</td>
+      <td class="gap-miss">HTTP 403</td>
+      <td>Direct API call returned forbidden. Reg D Form D filings confirmed via secondary sources (Enigma Gov Archive, IRA Club docs).</td>
+    </tr>
+    <tr>
+      <td>Enigma — DC Beneficial Owners (individual names)</td>
+      <td class="gap-partial">Partial</td>
+      <td>Registry confirmed entity status (Active) for SLP4 and SLP5 but contains corporate registration data, not individual beneficial owner names.</td>
+    </tr>
+    <tr>
+      <td>Yrefy SLP2, LLC</td>
+      <td class="gap-miss">Not found</td>
+      <td>SLP1 and SLP3 confirmed in SEC Form D data. SLP2 absent from all registries. Either never formed, formed under another name, or failed to file Form D.</td>
+    </tr>
+    <tr>
+      <td>AZ DIFI examination records</td>
+      <td class="gap-miss">Not checked</td>
+      <td>Home-state regulator records not accessed. Would require direct public records request to Arizona Department of Insurance and Financial Institutions.</td>
+    </tr>
+    <tr>
+      <td>FinCEN BOI (beneficial ownership)</td>
+      <td class="gap-miss">Not checked</td>
+      <td>Corporate Transparency Act filings may reveal individual owners of SLP entities. Not accessible via current tool set.</td>
+    </tr>
+    <tr>
+      <td>State court litigation (non-federal)</td>
+      <td class="gap-miss">Not checked</td>
+      <td>Only USDC NJ case found. State-level suits in AZ or other jurisdictions not searched.</td>
+    </tr>
+    <tr>
+      <td>Enigma brand analytics (card data)</td>
+      <td class="gap-partial">Not run</td>
+      <td>Enigma search_business did not return a direct Yrefy brand ID match, so get_brand_card_analytics could not be called. Revenue trajectory unknown from this source.</td>
+    </tr>
+    <tr>
+      <td>PACER / full NJ complaint text</td>
+      <td class="gap-miss">Not accessed</td>
+      <td>Case 1:25-cv-04586 confirmed via Justia and web. Full complaint text requires PACER login or RECAP Archive check.</td>
+    </tr>
+    <tr>
+      <td>NextStudent (Fenstermaker prior company)</td>
+      <td class="gap-miss">Not checked</td>
+      <td>Background on Fenstermaker's prior company not investigated. May be relevant to risk profile.</td>
+    </tr>
+  </table>
+
+  <!-- ══════════════════════════════════════════════ FOOTNOTES -->
+  <div class="footnotes">
+    <strong>Sources</strong><br><br>
+    <span class="fn-num">[1]</span>
+      <a href="https://www.sec.state.ma.us/divisions/securities/download/consent-order_2-3-25.pdf"
+         target="_blank">Massachusetts Securities Division — Consent Order, Docket E-2024-0334</a>
+      — February 3, 2025<br>
+    <span class="fn-num">[2]</span>
+      <a href="https://pitchbook.com/profiles/company/433021-33" target="_blank">PitchBook — Yrefy Company Profile</a>
+      — accessed July 2026<br>
+    <span class="fn-num">[3]</span>
+      <a href="https://advertisinglaw.fkks.com/post/102jz6l/yrefy-enters-into-750k-settlement-with-massachusetts-over-use-of-celebrity-endor"
+         target="_blank">Frankfurt Kurnit — Yrefy Enters Into $750K Settlement With Massachusetts</a>
+      — 2025<br>
+    <span class="fn-num">[4]</span>
+      <a href="https://www.mondaq.com/unitedstates/advertising-marketing-branding/1582732/yrefy-enters-into-$750k-settlement-with-massachusetts-over-use-of-celebrity-endorsers"
+         target="_blank">Mondaq — Yrefy $750K Settlement Analysis</a> — 2025<br>
+    <span class="fn-num">[5]</span>
+      <a href="https://www.naqf.org/news-and-updates/breaking-down-yrefy-for-investors-and-borrowers-fact-fiction-or-fraud"
+         target="_blank">NAQF — Breaking Down Yrefy: Fact, Fiction, or Fraud</a>
+      — February 11, 2025<br>
+    <span class="fn-num">[6]</span>
+      <a href="https://dockets.justia.com/docket/new-jersey/njdce/1:2025cv04586/569052"
+         target="_blank">Justia — EMONYON et al v. YREFY, LLC et al, 1:25-cv-04586</a>
+      — filed April 2025<br>
+    <span class="fn-num">[7]</span>
+      <a href="https://barryminkow.substack.com/p/three-unexplainable-things-yrefy"
+         target="_blank">Barry Minkow — "Three Unexplainable Things About Yrefy" (Substack)</a>
+      — Early 2026<br>
+    <span class="fn-num">[8]</span>
+      <a href="https://www.investyrefy.com/our-team" target="_blank">Yrefy — Our Team (investyrefy.com)</a>
+      — accessed July 2026<br>
+    <span class="fn-num">[9]</span>
+      Enigma Gov Archive — search "Yrefy LLC Phoenix Arizona" with historical_data=True — accessed July 1, 2026<br>
+    <span class="fn-num">[10]</span>
+      Enigma KYB — search_kyb(name="Yrefy LLC", state="AZ", city="Phoenix") — accessed July 1, 2026<br>
+    <span class="fn-num">[11]</span>
+      Enigma Negative News — search_negative_news(business_name="Yrefy LLC", address="6910 E Chauncey Ln Ste 105, Phoenix, AZ 85054") — accessed July 1, 2026<br>
+    <span class="fn-num">[12]</span>
+      <a href="https://www.bbb.org/us/az/phoenix/profile/loans/yrefy-llc-1126-1000043794"
+         target="_blank">BBB — Yrefy LLC Business Profile</a> — accessed July 2026<br>
+    <span class="fn-num">[13]</span>
+      <a href="https://www.iraclub.com/wp-content/uploads/YREFY-SLP4-Subscription-Agreement-IRA-and-401K-ONLY-02172022-M2i.pdf"
+         target="_blank">IRA Club — Yrefy SLP4 Subscription Agreement (Feb 17, 2022)</a><br>
+    <span class="fn-num">[14]</span>
+      <a href="https://www.law360.com/cases/682b9aceff0ca22b01bc996f"
+         target="_blank">Law360 — EMONYON v. YREFY case page</a> — 2025<br>
+    <span class="fn-num">[15]</span>
+      <a href="https://lendedu.com/blog/yrefy-review/" target="_blank">LendEDU — Yrefy Review 2026</a><br>
+    <span class="fn-num">[16]</span>
+      <a href="https://trader-magazine.com/reviews/yrefy-investment-review-up-to-10-25-returns-or-a-risky-bet/"
+         target="_blank">Trader Magazine — Yrefy Investment Review: Up to 10.25% Returns or Risky Bet?</a><br>
+    <span class="fn-num">[17]</span>
+      <a href="https://educationdata.org/yrefy-student-loan-refinance-review"
+         target="_blank">EducationData — Yrefy Student Loan Refinance Review (C+ rating)</a><br>
+    <span class="fn-num">OS</span>
+      OpenSanctions — match_entity(name="Yrefy", schema="Company", country="us") — accessed July 1, 2026<br>
+  </div>
+
+  <div class="report-footer">
+    Generated July 1, 2026 &nbsp;·&nbsp; Research: GDELT · OpenSanctions · Enigma MCP · MA Securities Division ·
+    SEC EDGAR · WebSearch &nbsp;·&nbsp;
+    This report contains public records and published information only. All allegations are reported
+    as disclosed by their sources. No conclusions about legal liability are expressed or implied.
+  </div>
+
+</div>
+</body>
+</html>
